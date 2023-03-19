@@ -15,7 +15,7 @@ Taken from [here](https://llvm.org/docs/GettingStarted.html).
 
 ### Overview
 
-Welcome to the LLVM project!
+Welcome to the Andi and Letizia's LLVM project!
 
 The LLVM project has multiple components. The core of the project is
 itself called "LLVM". This contains all of the tools, libraries, and header
