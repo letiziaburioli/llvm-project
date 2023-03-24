@@ -292,6 +292,11 @@ void RISCVPassConfig::addPostRegAlloc() {
   disablePass(&MachineLateInstrsCleanupID);
 }
 
+void RISCVPassConfig::addPreEmitPass(){
+  // RISCVTargetMachine &TM = getRISCVTargetMachine();
+  addPass(createRISCVCheckReturnAddr(TM));
+}
+
 yaml::MachineFunctionInfo *
 RISCVTargetMachine::createDefaultFuncInfoYAML() const {
   return new yaml::RISCVMachineFunctionInfo();
