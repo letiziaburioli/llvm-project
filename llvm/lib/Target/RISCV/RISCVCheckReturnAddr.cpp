@@ -66,10 +66,10 @@ namespace {
     }
 
   };
-  char DelJmp::ID = 0;
+  char CheckRA::ID = 0;
 } // end of anonymous namespace
 
-bool DelJmp::
+bool CheckRA::
 runOnMachineBasicBlock(MachineBasicBlock &MBB, MachineBasicBlock &MBBN) {
   bool Changed = false;
 
@@ -92,24 +92,38 @@ it's a JR because it means it's a return from a call */
         BuildMI(MBB, MI, DL, TII.get(RISCV::LW), DestReg)
         .addReg(RISCV::X1)
         .addImm(0)))*/
-        MachineBasicBlock::iterator I = MBB.begin()
+        const TargetInstrInfo *TII; //credo sia necessatio definirla per poi usarla nel Build
+        for(MachineBasicBlock::iterator I = MBB.begin();I != MBB.end();++I){
         if((I.getOpcode() == RISCV::JAL) || (I.getOpcode() == RISCV::JALR)){ // if CALL detected
         outs() << "Found Call\n";
 
-        MachineBasicBlock::iterator J = MBB.begin()
-        if (J == (MBB.end - 1))
+        //MachineBasicBlock::iterator J = MBB.begin()
+
+
+        for(MachineBasicBlock::iterator J = MBB.begin();J != MBB.end();++J){ 
+          
+          if(J==(MBB.end()-1)){
           BuildMI(MBB, DL, TII.get(RISCV::BNE))
           .addReg(RISCV::X1)
           .addReg(RISCV::X5)
           .addMBB(LoopMBB);
+          }
+          /*BuildMI(MBB,MBB.end(), DL, TII.get(RISCV::BNE))
+          .addReg(RISCV::X1)
+          .addReg(RISCV::X5)
+          .addMBB(LoopMBB);*/  /*versione 2 senza iteratore j dove mettiamo l'istruzione prima di MBB.end()*/
+          
           /*da RISCVExpandAtomicPseudoInsts.cpp: 
           MachineBasicBlock *MBB;
           auto LoopMBB = MF->CreateMachineBasicBlock(MBB.getBasicBlock());*/
 
              }
-    }
-  }
 
+
+    }
+
+        }
+}
     //save a copy of the return address
     
   // If the block has no terminators, it just falls into the block after it.
@@ -129,7 +143,7 @@ it's a JR because it means it's a return from a call */
   }
   return Changed;
 
-}
+
 
 /// createCpu0DelJmpPass - Returns a pass that DelJmp in Cpu0 MachineFunctions
 FunctionPass *llvm::createCheckReturnAddr(RISCVTargetMachine &tm) {
