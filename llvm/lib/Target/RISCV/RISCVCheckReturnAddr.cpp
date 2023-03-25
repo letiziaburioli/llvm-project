@@ -130,28 +130,8 @@ runOnMachineBasicBlock(MachineBasicBlock &MBB, MachineBasicBlock &MBBN) {
 
         }
 }
-    //save a copy of the return address
-    
-  // If the block has no terminators, it just falls into the block after it.
-  MachineBasicBlock::iterator I = MBB.getLastNonDebugInstr();
-  if (I == MBB.end() && (I->getOperand(0) != ))
-    return false;
-
-    
-  #if (I->getOpcode() == Cpu0::JMP && I->getOperand(0).getMBB() == &MBBN) {
-    // I is the instruction of "jmp #offset=0", as follows,
-    //     jmp	$BB0_3
-    // $BB0_3:
-    //     ld	$4, 28($sp)
-    ++NumDelJmp;
-    MBB.erase(I);	// delete the "JMP 0" instruction
-    Changed = true;	// Notify LLVM kernel Changed
-  }
-  return Changed;
 
 
-
-/// createCpu0DelJmpPass - Returns a pass that DelJmp in Cpu0 MachineFunctions
 FunctionPass *llvm::createCheckReturnAddr(RISCVTargetMachine &tm) {
   return new CheckRA(tm);
 }
