@@ -27,7 +27,7 @@ using namespace llvm;
 
 #define DEBUG_TYPE "cmp-ra"
 
-//STATISTIC(NumDelJmp, "Number of useless jmp deleted");
+//STATISTIC(NumRAChecked, "Number of comparison performed");
 
 static cl::opt<bool> EnableCheckReturnAddr(
   "enable-riscv-check-return-addr",
@@ -47,22 +47,26 @@ namespace {
 
     bool runOnMachineBasicBlock(MachineBasicBlock &MBB, MachineBasicBlock &MBBN);
     bool runOnMachineFunction(MachineFunction &F) override {
-      bool Changed = false;
+      bool Checked = false;
+
       if (EnableCheckReturnAddr) {
         MachineFunction::iterator FJ = F.begin();
         if (FJ != F.end())
           FJ++;
+
         if (FJ == F.end())
-          return Changed;
+          return Checked;
+
         for (MachineFunction::iterator FI = F.begin(), FE = F.end();
              FJ != FE; ++FI, ++FJ)
           // In STL style, F.end() is the dummy BasicBlock() like '\0' in 
           //  C string. 
           // FJ is the next BasicBlock of FI; When FI range from F.begin() to 
           //  the PreviousBasicBlock of F.end() call runOnMachineBasicBlock().
-          Changed |= runOnMachineBasicBlock(*FI, *FJ);
+
+          Checked |= runOnMachineBasicBlock(*FI, *FJ);
       }
-      return Changed;
+      return Checked;
     }
 
   };
@@ -71,49 +75,51 @@ namespace {
 
 bool CheckRA::
 runOnMachineBasicBlock(MachineBasicBlock &MBB, MachineBasicBlock &MBBN) {
-  bool Changed = false;
+  bool Checked = false;
 
- /* MachineBasicBlock::iterator I = MBB.end();
-  if (I != MBB.begin())
-    I--;	// set I to the last instruction
-  else
-    return Changed;
-*/
-/*MachineBasicBlock::iterator I = MBB.end() - 1; /*I is the last instruction of a BB. We want to know when 
-it's a JR because it means it's a return from a call */
+        const TargetInstrInfo *TII; //defined to use it later in the Build
 
-  //if (I->getOpcode() == RISCV::JR){ //when we find a JR
-
-  //for(auto &MBB : MF){
-    //for (auto &MI : MBB){
-      
-        //RISCVInstrInfo *TII;
-        /*DebugLoc DL;
-        BuildMI(MBB, MI, DL, TII.get(RISCV::LW), DestReg)
-        .addReg(RISCV::X1)
-        .addImm(0)))*/
-        const TargetInstrInfo *TII; //credo sia necessatio definirla per poi usarla nel Build
+        //save a copy of a call return address
         for(MachineBasicBlock::iterator I = MBB.begin();I != MBB.end();++I){
-        if((I.getOpcode() == RISCV::JAL) || (I.getOpcode() == RISCV::JALR)){ // if CALL detected
-        outs() << "Found Call\n";
 
-        //MachineBasicBlock::iterator J = MBB.begin()
+        if((I.getOpcode() == RISCV::JAL) || (I.getOpcode() == RISCV::JALR)){ //if CALL detected (isCall()?)
+          outs() << "Found Call\n"; //print message
+          Register FunctionReturnAddress = I.getOperand(0).getReg(); //save call destination register (rd is the first operand in format J)
+          Register DestReg; //define the "shadow stack" register to hold a copy of ra
 
+          //addi DestReg, ra, 0
+          BuildMI(MBB, DL, TII.get(RISCV::ADDI), DestReg) //should we use (RISCV::X5)?
+            .addReg(FunctionReturnAddress)
+            .addImm(0);
 
-        for(MachineBasicBlock::iterator J = MBB.begin();J != MBB.end();++J){ 
+        //add a function that creates a MBB for error handling
+        MachineBasicBlock *createMBB(MachineFunction &MF, const TargetInstrInfo *TII){
+
+        MachineBasicBlock ErrorMBB = MF.CreateMachineBasicBlock(); //MBB.getBasicBlock()
+        DebugLoc DL;
+
+        //MF.insert(ErrorMBB);
+        //report_fatal_error("Intruder! Return Address has been modified.")
+
+        BuildMI(ErrorMBB, DL, TII.get(RISCV::???)); //is there a RISCV instruction that generates an error message?
+        MF.push_back()
+
+        return ErrorMBB;
+        }
+       
+
+        // compare return address with shadow stack copy before returning from a function
+        for(MachineBasicBlock::iterator J = MBB.begin();J != MBB.end(); ++J){ 
           
-          if(J==(MBB.end()-1)){
+          if(J==(MBB.end()-1)){ // identify a ret before it's too late
           BuildMI(MBB, DL, TII.get(RISCV::BNE))
           .addReg(RISCV::X1)
-          .addReg(RISCV::X5)
-          .addMBB(LoopMBB);
+          .addReg(DestReg)
+          .addMBB(ErrorMBB); // llvm_unreachable
           }
-          /*BuildMI(MBB,MBB.end(), DL, TII.get(RISCV::BNE))
-          .addReg(RISCV::X1)
-          .addReg(RISCV::X5)
-          .addMBB(LoopMBB);*/  /*versione 2 senza iteratore j dove mettiamo l'istruzione prima di MBB.end()*/
           
-          /*da RISCVExpandAtomicPseudoInsts.cpp: 
+          
+          /*from RISCVExpandAtomicPseudoInsts.cpp: 
           MachineBasicBlock *MBB;
           auto LoopMBB = MF->CreateMachineBasicBlock(MBB.getBasicBlock());*/
 
