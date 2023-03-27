@@ -68,6 +68,8 @@ void initializeRISCVInsertVSETVLIPass(PassRegistry &);
 FunctionPass *createRISCVRedundantCopyEliminationPass();
 void initializeRISCVRedundantCopyEliminationPass(PassRegistry &);
 
+FunctionPass *createRISCVCheckReturnAddr(RISCVTargetMachine &TM);
+
 InstructionSelector *createRISCVInstructionSelector(const RISCVTargetMachine &,
                                                     RISCVSubtarget &,
                                                     RISCVRegisterBankInfo &);
