@@ -77,18 +77,37 @@ bool CheckRA::
 runOnMachineBasicBlock(MachineBasicBlock &MBB, MachineBasicBlock &MBBN) {
   bool Checked = false;
 
-        const TargetInstrInfo *TII; //defined to use it later in the Build
+  const TargetInstrInfo *TII; //defined to use it later in the Build
+  //const MailBoxAddr = 0x00000001; //define arbitrary address for the mailbox
+  Register DestReg; 
 
-        //save a copy of a call return address
-        for(MachineBasicBlock::iterator I = MBB.begin();I != MBB.end();++I){
+  //save a copy of a call return address
+  //for(MachineBasicBlock::iterator I = MBB.begin();I != MBB.end();++I){
+    for (auto &MBB:MF){
+      for (auto &MI:MBB){
+        if((I.getOpcode() == RISCV::JAL) || (I.getOpcode() == RISCV::JALR)){
 
-        if((I.getOpcode() == RISCV::JAL) || (I.getOpcode() == RISCV::JALR)){ //if CALL detected (isCall()?)
+          //if a CALL is detected
+          outs() << "Found Call\n"; //print message
+          Register FunctionReturnAddress = I.getOperand(0).getReg(); //save call destination register (rd is the first operand in format J)
+
+          //SW FunctionReturnAddress, 0(DestReg) --> FunctionReturnAddress = @(DestReg + 0)
+          //this SW is inserted before the call takes place
+          BuildMI(MBB, MI, DL, TII.get(RISCV::SW), FunctionReturnAddress) 
+              .addReg(DestReg)
+              .addImm(0);
+
+
+        }
+  }
+}
+        /*if((I.getOpcode() == RISCV::JAL) || (I.getOpcode() == RISCV::JALR)){ //if CALL detected (isCall()?)
           outs() << "Found Call\n"; //print message
           Register FunctionReturnAddress = I.getOperand(0).getReg(); //save call destination register (rd is the first operand in format J)
           Register DestReg; //define the "shadow stack" register to hold a copy of ra
 
           //addi DestReg, ra, 0
-          BuildMI(MBB, DL, TII.get(RISCV::ADDI), DestReg) //should we use (RISCV::X5)?
+          BuildMI(MBB, MBBN, DL, TII.get(RISCV::ADDI), DestReg) //should we use (RISCV::X5)?
             .addReg(FunctionReturnAddress)
             .addImm(0);
 
@@ -105,10 +124,10 @@ runOnMachineBasicBlock(MachineBasicBlock &MBB, MachineBasicBlock &MBBN) {
         MF.push_back()
 
         return ErrorMBB;
-        }
+        }*/
        
 
-        // compare return address with shadow stack copy before returning from a function
+        /*compare return address with shadow stack copy before returning from a function
         for(MachineBasicBlock::iterator J = MBB.begin();J != MBB.end(); ++J){ 
           
           if(J==(MBB.end()-1)){ // identify a ret before it's too late
@@ -119,17 +138,17 @@ runOnMachineBasicBlock(MachineBasicBlock &MBB, MachineBasicBlock &MBBN) {
           }
           
           
-          /*from RISCVExpandAtomicPseudoInsts.cpp: 
+          //from RISCVExpandAtomicPseudoInsts.cpp: 
           MachineBasicBlock *MBB;
-          auto LoopMBB = MF->CreateMachineBasicBlock(MBB.getBasicBlock());*/
+          auto LoopMBB = MF->CreateMachineBasicBlock(MBB.getBasicBlock());
+          
+             }*/
 
-             }
 
-
-    }
+    /*}
 
         }
-}
+}*/
 
 
 FunctionPass *llvm::createCheckReturnAddr(RISCVTargetMachine &tm) {
