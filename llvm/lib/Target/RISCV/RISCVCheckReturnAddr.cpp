@@ -1,6 +1,6 @@
-#include "MCTargetDesc/RISCVInstPrinter.h"
+/*#include "MCTargetDesc/RISCVInstPrinter.h"
 #include "MCTargetDesc/RISCVMCExpr.h"
-#include "MCTargetDesc/RISCVTargetStreamer.h"
+#include "MCTargetDesc/RISCVTargetStreamer.h"*/
 #include "RISCV.h"
 #include "RISCVTargetMachine.h"
 #include "TargetInfo/RISCVTargetInfo.h"
@@ -11,7 +11,7 @@
 #include "llvm/CodeGen/MachineFunctionPass.h"
 #include "llvm/CodeGen/MachineInstr.h"
 #include "llvm/CodeGen/MachineModuleInfo.h"
-#include "llvm/MC/MCAsmInfo.h"
+/*#include "llvm/MC/MCAsmInfo.h"
 #include "llvm/MC/MCContext.h"
 #include "llvm/MC/MCInst.h"
 #include "llvm/MC/MCInstBuilder.h"
@@ -19,7 +19,7 @@
 #include "llvm/MC/MCSectionELF.h"
 #include "llvm/MC/MCStreamer.h"
 #include "llvm/MC/MCSymbol.h"
-#include "llvm/MC/TargetRegistry.h"
+#include "llvm/MC/TargetRegistry.h"*/
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Instrumentation/HWAddressSanitizer.h"
 
