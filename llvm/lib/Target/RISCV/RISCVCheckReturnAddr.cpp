@@ -1,6 +1,6 @@
-/*#include "MCTargetDesc/RISCVInstPrinter.h"
+#include "MCTargetDesc/RISCVInstPrinter.h"
 #include "MCTargetDesc/RISCVMCExpr.h"
-#include "MCTargetDesc/RISCVTargetStreamer.h"*/
+#include "MCTargetDesc/RISCVTargetStreamer.h"
 #include "RISCV.h"
 #include "RISCVTargetMachine.h"
 #include "TargetInfo/RISCVTargetInfo.h"
@@ -11,7 +11,7 @@
 #include "llvm/CodeGen/MachineFunctionPass.h"
 #include "llvm/CodeGen/MachineInstr.h"
 #include "llvm/CodeGen/MachineModuleInfo.h"
-/*#include "llvm/MC/MCAsmInfo.h"
+#include "llvm/MC/MCAsmInfo.h"
 #include "llvm/MC/MCContext.h"
 #include "llvm/MC/MCInst.h"
 #include "llvm/MC/MCInstBuilder.h"
@@ -19,9 +19,16 @@
 #include "llvm/MC/MCSectionELF.h"
 #include "llvm/MC/MCStreamer.h"
 #include "llvm/MC/MCSymbol.h"
-#include "llvm/MC/TargetRegistry.h"*/
+#include "llvm/MC/TargetRegistry.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Instrumentation/HWAddressSanitizer.h"
+#include "llvm/CodeGen/AsmPrinter.h"
+#include "llvm/MC/TargetRegistry.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/Path.h"
+#include "llvm/Target/TargetMachine.h"
+#include <unordered_set>
+
 
 using namespace llvm;
 
@@ -29,11 +36,11 @@ using namespace llvm;
 
 //STATISTIC(NumRAChecked, "Number of comparison performed");
 
-static cl::opt<bool> EnableCheckReturnAddr(
+/*static cl::opt<bool> EnableCheckReturnAddr(
   "enable-riscv-check-return-addr",
   cl::init(true),
   cl::desc("Check Return Address when returnig from a call"),
-  cl::Hidden);
+  cl::Hidden);*/
 
 namespace {
   struct CheckRA : public MachineFunctionPass {
@@ -155,4 +162,4 @@ FunctionPass *llvm::createCheckReturnAddr(RISCVTargetMachine &tm) {
   return new CheckRA(tm);
 }
 
-#endif
+//endif#
