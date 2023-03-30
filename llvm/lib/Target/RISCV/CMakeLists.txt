@@ -20,6 +20,7 @@ add_public_tablegen_target(RISCVCommonTableGen)
 
 add_llvm_target(RISCVCodeGen
   RISCVAsmPrinter.cpp
+  RISCVCheckReturnAddr.cpp
   RISCVCodeGenPrepare.cpp
   RISCVMakeCompressible.cpp
   RISCVExpandAtomicPseudoInsts.cpp
