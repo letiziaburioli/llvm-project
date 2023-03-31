@@ -22,12 +22,6 @@
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Instrumentation/HWAddressSanitizer.h"
-#include "llvm/CodeGen/AsmPrinter.h"
-#include "llvm/MC/TargetRegistry.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Target/TargetMachine.h"
-
 
 using namespace llvm;
 
@@ -35,11 +29,11 @@ using namespace llvm;
 
 //STATISTIC(NumRAChecked, "Number of comparison performed");
 
-/*static cl::opt<bool> EnableCheckReturnAddr(
+static cl::opt<bool> EnableCheckReturnAddr(
   "enable-riscv-check-return-addr",
   cl::init(true),
   cl::desc("Check Return Address when returnig from a call"),
-  cl::Hidden);*/
+  cl::Hidden);
 
 namespace {
   struct CheckRA : public MachineFunctionPass {
@@ -161,4 +155,4 @@ FunctionPass *llvm::createCheckReturnAddr(RISCVTargetMachine &tm) {
   return new CheckRA(tm);
 }
 
-//endif#
+#endif

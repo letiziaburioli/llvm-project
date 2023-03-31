@@ -1,0 +1,42 @@
+Performing C++ SOURCE FILE Test LINKER_SUPPORTS_COLOR_DIAGNOSTICS failed with the following output:
+Change Dir: /home/letizia/llvm_repo/llvm-project/clang/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/local/bin/ninja cmTC_de430 && [1/2] Building CXX object CMakeFiles/cmTC_de430.dir/src.cxx.o
+[2/2] Linking CXX executable cmTC_de430
+FAILED: cmTC_de430 
+: && /usr/bin/clang++  -fPIC -fvisibility-inlines-hidden -Werror=date-time -Werror=unguarded-availability-new -w -fdiagnostics-color -DLINKER_SUPPORTS_COLOR_DIAGNOSTICS  -Wl,--color-diagnostics CMakeFiles/cmTC_de430.dir/src.cxx.o  -o cmTC_de430   && :
+/usr/bin/ld: unrecognized option '--color-diagnostics'
+/usr/bin/ld: use the --help option for usage information
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+int main() { return 0; }
+Determining if the os_signpost_interval_begin exist failed with the following output:
+Change Dir: /home/letizia/llvm_repo/llvm-project/clang/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/local/bin/ninja cmTC_7139d && [1/2] Building C object CMakeFiles/cmTC_7139d.dir/CheckSymbolExists.c.o
+FAILED: CMakeFiles/cmTC_7139d.dir/CheckSymbolExists.c.o 
+/usr/bin/clang   -fPIC -Werror=date-time -Werror=unguarded-availability-new -w -fdiagnostics-color -o CMakeFiles/cmTC_7139d.dir/CheckSymbolExists.c.o   -c CheckSymbolExists.c
+CheckSymbolExists.c:2:10: fatal error: 'os/signpost.h' file not found
+#include <os/signpost.h>
+         ^~~~~~~~~~~~~~~
+1 error generated.
+ninja: build stopped: subcommand failed.
+
+
+File /home/letizia/llvm_repo/llvm-project/clang/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <os/signpost.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef os_signpost_interval_begin
+  return ((int*)(&os_signpost_interval_begin))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
