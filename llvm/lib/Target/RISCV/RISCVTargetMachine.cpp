@@ -186,6 +186,7 @@ public:
   bool addGlobalInstructionSelect() override;
   void addPreEmitPass() override;
   void addPreEmitPass2() override;
+  void addPreEmitPass3(); //override;
   void addPreSched2() override;
   void addMachineSSAOptimization() override;
   void addPreRegAlloc() override;
@@ -292,9 +293,9 @@ void RISCVPassConfig::addPostRegAlloc() {
   disablePass(&MachineLateInstrsCleanupID);
 }
 
-void RISCVPassConfig::addPreEmitPass(){
+void RISCVPassConfig::addPreEmitPass3(){
   // RISCVTargetMachine &TM = getRISCVTargetMachine();
-  addPass(createRISCVCheckReturnAddr(TM));
+  addPass(createRISCVCheckReturnAddr());
 }
 
 yaml::MachineFunctionInfo *

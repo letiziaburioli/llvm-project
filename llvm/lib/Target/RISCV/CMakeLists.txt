@@ -42,7 +42,6 @@ add_llvm_target(RISCVCodeGen
   RISCVTargetMachine.cpp
   RISCVTargetObjectFile.cpp
   RISCVTargetTransformInfo.cpp
-  RISCVCheckReturnAddr.cpp
   GISel/RISCVCallLowering.cpp
   GISel/RISCVInstructionSelector.cpp
   GISel/RISCVLegalizerInfo.cpp
@@ -62,6 +61,7 @@ add_llvm_target(RISCVCodeGen
   Target
   TransformUtils
   GlobalISel
+  #RISCVCheckReturnAddr
 
   ADD_TO_COMPONENT
   RISCV
