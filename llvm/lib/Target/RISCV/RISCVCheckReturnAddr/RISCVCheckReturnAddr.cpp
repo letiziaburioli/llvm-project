@@ -82,8 +82,8 @@ bool CheckRA::runOnMachineBasicBlock(MachineBasicBlock &MBB) {
   bool Checked = false;
 
   const TargetInstrInfo *TII; //defined to use it later in the Build
-  //const MailBoxAddr = 0x00000001; //define arbitrary address for the mailbox
-  Register DestReg; 
+  const int MailBoxAddr = 0x00000001; //define arbitrary address for the mailbox
+  //Register DestReg; 
 
   //MachineFunction &MF;
 
@@ -93,28 +93,41 @@ bool CheckRA::runOnMachineBasicBlock(MachineBasicBlock &MBB) {
     for (auto &MI:MBB){
       //if((MI.getOpcode() == RISCV::JAL) || (MI.getOpcode() == RISCV::JALR)){
 
+        // Save Return Address before a function is called
+
         if(MI.isCall()){
 
-        Checked = true;
+          Checked = true;
 
-        //if a CALL is detected
-        outs() << "Found Call\n"; //print message
-        Register FunctionReturnAddress = MI.getOperand(0).getReg(); //save call destination register (rd is the first operand in format J)
+          //if a CALL is detected
+          outs() << "Found Call\n"; //print message
+          Register FunctionReturnAddress = MI.getOperand(0).getReg(); //save call destination register (rd is the first operand in format J)
 
-        //add an empty addi 
-        BuildMI(MBB, MI, DL, TII->get(RISCV::ADDI), RISCV::X0)
-          .addReg(RISCV::X0)
-          .addImm(0);
+          //SW FunctionReturnAddress, 0(DestReg) --> FunctionReturnAddress saved to @(DestReg + 0) --> if DestReg is used
 
+          //FunctionReturnAddr saved to @(0 + MailBoxAddr)
 
-        //SW FunctionReturnAddress, 0(DestReg) --> FunctionReturnAddress = @(DestReg + 0)
-        //this SW is inserted before the call takes place
-        BuildMI(MBB, MI, DL, TII->get(RISCV::SW), FunctionReturnAddress) 
-              .addReg(DestReg)
-              .addImm(0);
+          //this SW is inserted before the call takes place
+          BuildMI(MBB, MI, DL, TII->get(RISCV::SW), FunctionReturnAddress) 
+              .addReg(RISCV::X0)
+              .addImm(MailBoxAddr); 
+        }
+        
+        // Store the correct Return Address when returning from a call
 
+        if(MI.isReturn()){
 
-      }    
+          Checked = true;
+
+          //if a RETURN is detected
+          outs() << "Found Return\n"; //print message
+
+          BuildMI(MBB, MI, DL, TII->get(RISCV::LW), RISCV::X1) 
+              .addReg(RISCV::X0)
+              .addImm(MailBoxAddr); 
+
+        }
+
     }
   //}
 
