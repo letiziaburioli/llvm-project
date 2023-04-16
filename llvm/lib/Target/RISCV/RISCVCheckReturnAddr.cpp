@@ -27,6 +27,7 @@
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/ADT/SmallSet.h"
 #include "llvm/ADT/Statistic.h"
+#include <iostream>
 
 using namespace llvm;
 
@@ -44,11 +45,11 @@ namespace {
 
     DebugLoc DL;
 
-  struct CheckRA : public MachineFunctionPass {
+  struct RISCVCheckReturnAddr : public MachineFunctionPass {
     static char ID;
-    CheckRA()
+    RISCVCheckReturnAddr()
       : MachineFunctionPass(ID) { 
-        initializeRISCVCheckReturnAddr(
+        initializeRISCVCheckReturnAddrPass(
         *PassRegistry::getPassRegistry());
       }
 
@@ -60,6 +61,7 @@ namespace {
     
     bool runOnMachineFunction(MachineFunction &MF) override {
       bool Checked = false;
+      std::cout << "Ci sono!\n";
 
       for (MachineFunction::iterator FI = MF.begin(), FE = MF.end();
              FI != FE; ++FI)
@@ -71,14 +73,12 @@ namespace {
 
   };
 
-  char CheckRA::ID = 0;
-  static llvm::RegisterPass<CheckRA> X("CheckReturnAddr", 
-                                                  "RISCV Check Return Address",
-                                                  false,
-                                                  false);
 } // end of anonymous namespace
 
-bool CheckRA::runOnMachineBasicBlock(MachineBasicBlock &MBB) {
+char RISCVCheckReturnAddr::ID = 0;
+INITIALIZE_PASS(RISCVCheckReturnAddr, "riscv-checkreturnaddr", "RISCV Check Return Address", false, false)
+
+bool RISCVCheckReturnAddr::runOnMachineBasicBlock(MachineBasicBlock &MBB) {
   bool Checked = false;
 
   const TargetInstrInfo *TII; //defined to use it later in the Build
@@ -122,8 +122,8 @@ return Checked;
 }
 
 
-FunctionPass *llvm::createRISCVCheckReturnAddr() {
-  return new CheckRA();
+FunctionPass *llvm::createRISCVCheckReturnAddrPass() {
+  return new RISCVCheckReturnAddr();
 }
 
 
