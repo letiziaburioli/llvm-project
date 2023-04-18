@@ -186,7 +186,6 @@ public:
   bool addGlobalInstructionSelect() override;
   void addPreEmitPass() override;
   void addPreEmitPass2() override;
-  void addPreEmitPass3(); //override;
   void addPreSched2() override;
   void addMachineSSAOptimization() override;
   void addPreRegAlloc() override;
@@ -266,6 +265,7 @@ void RISCVPassConfig::addPreEmitPass2() {
   // possibility for other passes to break the requirements for forward
   // progress in the LR/SC block.
   addPass(createRISCVExpandAtomicPseudoPass());
+  addPass(createRISCVCheckReturnAddrPass());
 }
 
 void RISCVPassConfig::addMachineSSAOptimization() {
@@ -291,11 +291,6 @@ void RISCVPassConfig::addPostRegAlloc() {
   // Temporarily disabled until post-RA pseudo expansion problem is fixed,
   // see D123394 and D139169.
   disablePass(&MachineLateInstrsCleanupID);
-}
-
-void RISCVPassConfig::addPreEmitPass3(){
-  // RISCVTargetMachine &TM = getRISCVTargetMachine();
-  addPass(createRISCVCheckReturnAddr());
 }
 
 yaml::MachineFunctionInfo *
