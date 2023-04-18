@@ -2,6 +2,7 @@
 #include "MCTargetDesc/RISCVMCExpr.h"
 #include "MCTargetDesc/RISCVTargetStreamer.h"
 #include "RISCV.h"
+#include "RISCVInstrInfo.h"
 #include "RISCVTargetMachine.h"
 #include "TargetInfo/RISCVTargetInfo.h"
 #include "llvm/ADT/Statistic.h"
@@ -10,6 +11,7 @@
 #include "llvm/CodeGen/MachineConstantPool.h"
 #include "llvm/CodeGen/MachineFunctionPass.h"
 #include "llvm/CodeGen/MachineInstr.h"
+#include "llvm/CodeGen/MachineInstrBuilder.h"
 #include "llvm/CodeGen/MachineModuleInfo.h"
 #include "llvm/MC/MCAsmInfo.h"
 #include "llvm/MC/MCContext.h"
@@ -24,6 +26,7 @@
 #include "llvm/Transforms/Instrumentation/HWAddressSanitizer.h"
 #include "llvm/CodeGen/MachineFunctionPass.h"
 #include "llvm/CodeGen/TargetInstrInfo.h"
+#include "llvm/CodeGen/TargetRegisterInfo.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/ADT/SmallSet.h"
 #include "llvm/ADT/Statistic.h"
@@ -57,69 +60,96 @@ namespace {
       return "RISCV Check Return Address";
     }
 
-    bool runOnMachineBasicBlock(MachineBasicBlock &MBB);
-    
-    bool runOnMachineFunction(MachineFunction &MF) override {
-      bool Checked = false;
-      std::cout << "Ci sono!\n";
+    //bool runOnMachineBasicBlock(MachineBasicBlock &MBB);
 
-      for (MachineFunction::iterator FI = MF.begin(), FE = MF.end();
+    bool runOnMachineFunction(MachineFunction &MF) override; //{
+      //bool Checked = false;
+      //std::cout << "Ci sono!\n";*
+
+      /*for (MachineFunction::iterator FI = MF.begin(), FE = MF.end();
              FI != FE; ++FI)
-        
-          Checked |= runOnMachineBasicBlock(*FI);
+
+          Checked |= runOnMachineBasicBlock(*FI);*/
       
-      return Checked;
-    }
+      //return Checked;
+    }; //struct
 
-  };
-
-} // end of anonymous namespace
+  } //end of anonymous namespace
 
 char RISCVCheckReturnAddr::ID = 0;
+
 INITIALIZE_PASS(RISCVCheckReturnAddr, "riscv-checkreturnaddr", "RISCV Check Return Address", false, false)
 
-bool RISCVCheckReturnAddr::runOnMachineBasicBlock(MachineBasicBlock &MBB) {
-  bool Checked = false;
+bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
+  std::cout << "Ci sono!\n";
+//bool RISCVCheckReturnAddr::runOnMachineBasicBlock(MachineBasicBlock &MBB) {
+  //bool Checked = false;
 
-  const TargetInstrInfo *TII; //defined to use it later in the Build
-  //const MailBoxAddr = 0x00000001; //define arbitrary address for the mailbox
-  Register DestReg; 
+  
+  const int MailBoxAddr = 0x00000003; //define arbitrary address for the mailbox
+  //Register DestReg; 
 
   //MachineFunction &MF;
 
   //save a copy of a call return address
   //for(MachineFunction::iterator I = MF.begin(); I != MF.end(); ++I){
-  //for (auto &MBB:*MF){
-    for (auto &MI:MBB){
-      //if((MI.getOpcode() == RISCV::JAL) || (MI.getOpcode() == RISCV::JALR)){
+
+  for(auto &MBB:MF){
+
+    for(auto &MI:MBB){
+
+        const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo(); //defined to use it later in the Build
 
         if(MI.isCall()){
+        //if((MI.getOpcode() == RISCV::JAL) || (MI.getOpcode() == RISCV::JALR)){ --> does not recognize call
 
-        Checked = true;
+          //Checked = true;
 
-        //if a CALL is detected
-        outs() << "Found Call\n"; //print message
-        Register FunctionReturnAddress = MI.getOperand(0).getReg(); //save call destination register (rd is the first operand in format J)
+          //if a CALL is detected
+          outs() << "Found Call\n"; //print message
 
-        //add an empty addi 
-        BuildMI(MBB, MI, DL, TII->get(RISCV::ADDI), RISCV::X0)
-          .addReg(RISCV::X0)
-          .addImm(0);
+          Register FunctionReturnAddress = MI.getOperand(0).getReg(); //save call destination register (rd is the first operand in format J)
 
+          //SW FunctionReturnAddress, 0(DestReg) --> FunctionReturnAddress saved to @(DestReg + 0) --> if DestReg is used
 
-        //SW FunctionReturnAddress, 0(DestReg) --> FunctionReturnAddress = @(DestReg + 0)
-        //this SW is inserted before the call takes place
-        BuildMI(MBB, MI, DL, TII->get(RISCV::SW), FunctionReturnAddress) 
-              .addReg(DestReg)
-              .addImm(0);
+          //FunctionReturnAddr saved to @(0 + MailBoxAddr)
 
+          //this SW is inserted before the call takes place
+          MachineBasicBlock::iterator MBBI = BuildMI(MBB, MI, DL, TII->get(RISCV::SW), FunctionReturnAddress) 
+              .addReg(RISCV::X0)
+              .addImm(MailBoxAddr); 
 
-      }    
+          /*MachineBasicBlock::iterator MBBI = BuildMI(MBB, MI, DL, TII->get(RISCV::SW), RISCV::X1)
+              .addReg(RISCV::X31)
+              .addImm(0);*/
+          
+          outs() << "Inserted SW\n"; //print message
+          return true;
+
+        }
+        
+        // Store the correct Return Address when returning from a call
+
+        if(MI.isReturn()){
+
+          //Checked = true;
+
+          //if a RETURN is detected
+          outs() << "Found Return\n"; //print message
+
+          MachineBasicBlock::iterator MBBI = BuildMI(MBB, MI, DL, TII->get(RISCV::LW), RISCV::X1) 
+              .addReg(RISCV::X0)
+              .addImm(MailBoxAddr); 
+
+          outs() << "Done Return\n"; //print message
+
+        }
     }
-  //}
+  }
 
-return Checked;
+return false;
 }
+// } // RunOnMBB
 
 
 FunctionPass *llvm::createRISCVCheckReturnAddrPass() {
