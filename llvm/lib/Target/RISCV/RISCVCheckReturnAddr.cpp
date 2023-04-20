@@ -31,6 +31,7 @@
 #include "llvm/ADT/SmallSet.h"
 #include "llvm/ADT/Statistic.h"
 #include <iostream>
+#include "llvm/Support/CommandLine.h"
 
 using namespace llvm;
 
@@ -43,6 +44,13 @@ using namespace llvm;
   cl::init(true),
   cl::desc("Check Return Address when returnig from a call"),
   cl::Hidden);*/
+
+static cl::opt<int> MailBoxAddr(
+  "m",
+  cl::init(1),
+  cl::desc("Specify MailBox Address"),
+  cl::value_desc("mailbox address")
+);
 
 namespace {
 
@@ -80,19 +88,17 @@ char RISCVCheckReturnAddr::ID = 0;
 
 INITIALIZE_PASS(RISCVCheckReturnAddr, "riscv-checkreturnaddr", "RISCV Check Return Address", false, false)
 
+//define debug values
+int countMF = 0;
+int countCall = 0;
+int countReturn = 0;
+
 bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
-  std::cout << "Ci sono!\n";
-//bool RISCVCheckReturnAddr::runOnMachineBasicBlock(MachineBasicBlock &MBB) {
-  //bool Checked = false;
+  countMF++;
+  std::cout << "Ci sono! MF n. " << countMF << "\n";
 
-  
-  const int MailBoxAddr = 0x00000003; //define arbitrary address for the mailbox
-  //Register DestReg; 
-
-  //MachineFunction &MF;
-
-  //save a copy of a call return address
-  //for(MachineFunction::iterator I = MF.begin(); I != MF.end(); ++I){
+  //const int MailBoxAddr = 0x00000003; //define arbitrary address for the mailbox
+  //let the user choose the MailBox value
 
   for(auto &MBB:MF){
 
@@ -103,28 +109,25 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
         if(MI.isCall()){
         //if((MI.getOpcode() == RISCV::JAL) || (MI.getOpcode() == RISCV::JALR)){ --> does not recognize call
 
-          //Checked = true;
+          countCall++;
+          std::cout << "Call n. " << countCall << "\n";
 
           //if a CALL is detected
           outs() << "Found Call\n"; //print message
 
           Register FunctionReturnAddress = MI.getOperand(0).getReg(); //save call destination register (rd is the first operand in format J)
 
-          //SW FunctionReturnAddress, 0(DestReg) --> FunctionReturnAddress saved to @(DestReg + 0) --> if DestReg is used
+      
 
           //FunctionReturnAddr saved to @(0 + MailBoxAddr)
 
           //this SW is inserted before the call takes place
-          MachineBasicBlock::iterator MBBI = BuildMI(MBB, MI, DL, TII->get(RISCV::SW), FunctionReturnAddress) 
+          MachineBasicBlock::iterator MBBI = BuildMI(MBB, MI, DL, TII->get(RISCV::SW), RISCV::X1) 
               .addReg(RISCV::X0)
               .addImm(MailBoxAddr); 
 
-          /*MachineBasicBlock::iterator MBBI = BuildMI(MBB, MI, DL, TII->get(RISCV::SW), RISCV::X1)
-              .addReg(RISCV::X31)
-              .addImm(0);*/
-          
           outs() << "Inserted SW\n"; //print message
-          return true;
+          //return true;
 
         }
         
@@ -132,7 +135,8 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
 
         if(MI.isReturn()){
 
-          //Checked = true;
+          countReturn++;
+          std::cout << "Return n. " << countReturn << "\n"; 
 
           //if a RETURN is detected
           outs() << "Found Return\n"; //print message

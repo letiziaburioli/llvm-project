@@ -1,5 +1,6 @@
-//Create a function
 //#include <stdio.h>
+//#include "llvm/Support/CommandLine.h"
+
 int TestFunction(){
 	/*int a = 5;
 	int b = 3;
@@ -12,7 +13,18 @@ int TestFunction(){
 	//printf("Test Function Executed!");
 }
 
+int TestFunction2(){
+	int c = 2;
+	
+	return c+1;
+}
+
 int main(){
-	TestFunction(); //call the function
+	//cl::ParseCommandLineOptions();
+	
+	TestFunction(); //call function 1
+	int d = 7;
+	TestFunction2(); //call function 2
+	int e = 8;
 	return 0;
 }
