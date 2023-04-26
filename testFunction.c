@@ -1,30 +1,29 @@
-//#include <stdio.h>
-//#include "llvm/Support/CommandLine.h"
+//testFunction: call 2 functions --> Checked = 1
 
-int TestFunction(){
-	/*int a = 5;
+int TestFunction1(){
+	int a = 5;
 	int b = 3;
-	int mySum = a + b;*/
-	int mySum = 3+5;
+	int mySum = a + b;
 	
 	return mySum;
-	
-	//printf("a + b = %d\n", mySum);
-	//printf("Test Function Executed!");
+
 }
 
 int TestFunction2(){
 	int c = 2;
+	int d = 4;
+	int myMul = c * d;
 	
-	return c+1;
+	return myMul;
 }
 
 int main(){
-	//cl::ParseCommandLineOptions();
+
+	int Sum = TestFunction1(); //call function 1
 	
-	TestFunction(); //call function 1
-	int d = 7;
-	TestFunction2(); //call function 2
-	int e = 8;
+	int Prod = TestFunction2(); //call function 2
+	
+	int Res = Sum + Prod;
+	
 	return 0;
 }
