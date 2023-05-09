@@ -1,27 +1,13 @@
-#include "MCTargetDesc/RISCVInstPrinter.h"
-#include "MCTargetDesc/RISCVMCExpr.h"
-#include "MCTargetDesc/RISCVTargetStreamer.h"
 #include "RISCV.h"
 #include "RISCVInstrInfo.h"
 #include "RISCVTargetMachine.h"
 #include "TargetInfo/RISCVTargetInfo.h"
-#include "llvm/ADT/Statistic.h"
-#include "llvm/BinaryFormat/ELF.h"
 #include "llvm/CodeGen/AsmPrinter.h"
 #include "llvm/CodeGen/MachineConstantPool.h"
 #include "llvm/CodeGen/MachineFunctionPass.h"
 #include "llvm/CodeGen/MachineInstr.h"
 #include "llvm/CodeGen/MachineInstrBuilder.h"
 #include "llvm/CodeGen/MachineModuleInfo.h"
-#include "llvm/MC/MCAsmInfo.h"
-#include "llvm/MC/MCContext.h"
-#include "llvm/MC/MCInst.h"
-#include "llvm/MC/MCInstBuilder.h"
-#include "llvm/MC/MCObjectFileInfo.h"
-#include "llvm/MC/MCSectionELF.h"
-#include "llvm/MC/MCStreamer.h"
-#include "llvm/MC/MCSymbol.h"
-#include "llvm/MC/TargetRegistry.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Instrumentation/HWAddressSanitizer.h"
 #include "llvm/CodeGen/MachineFunctionPass.h"
@@ -78,7 +64,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
   countMF++;
   std::cout << "MF n. " << countMF << "\n";
 
-  bool Checked = false;
+  bool Checked = false; //default value if no function is called
 
   for(auto &MBB:MF){
 
@@ -104,6 +90,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
         }
         
         // Store the correct Return Address when returning from a call
+        // Decide if this should be done also for the main ret
         if(MI.isReturn()){
 
           //if a RETURN is detected
@@ -127,5 +114,3 @@ return Checked;
 FunctionPass *llvm::createRISCVCheckReturnAddrPass() {
   return new RISCVCheckReturnAddr();
 }
-
-
