@@ -22,8 +22,10 @@ cd llvm
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=RISCV
 cmake --build build
 cd ..
-clang -target riscv64-unknown-elf -O0 --debug -S -emit-llvm testFunction.c
-llvm/build/bin/llc testFunction.bc -o - -m 10
+clang -target riscv64-unknown-elf -O0 -S -o - testFunction.c
+
+#clang -target riscv64-unknown-elf -O0 --debug -S -emit-llvm testFunction.c
+#llvm/build/bin/llc testFunction.bc -o - -m 10
 
 
 The LLVM project has multiple components. The core of the project is
