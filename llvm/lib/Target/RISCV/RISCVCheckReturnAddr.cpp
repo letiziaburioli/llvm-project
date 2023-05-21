@@ -32,6 +32,14 @@ static cl::opt<int> MailBoxAddr(
   cl::desc("Specify MailBox Address"),
   cl::value_desc("mailbox address")
 );
+/*add CommandLine option -main-ret to decide if the pas should 
+be applied also to the ret of the main function */
+static cl::opt<int> MainRet(
+  "main-ret",
+  cl::init(1), //(0x0008BEAF),
+  cl::desc("Apply Pass to ret of main function"),
+  cl::value_desc("protect main ret")
+);
 
 namespace {
 
@@ -83,7 +91,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
         const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo(); //defined to use it later in the BuildMI
 
         //register to load upper immediate of the MailBoxAddr. Random initialization
-        //Register UI_MailBoxAddr = RISCV::X0; //MI.getOperand(1).getReg(); 
+        Register UI_MailBoxAddr = MI.getOperand(0).getReg(); //RISCV::X0; 
         
         if(MI.isCall()){
         
@@ -96,20 +104,20 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
           #endif
 
 
-          /*//check if MailBoxAddr exceeds the 12 bits of the Immediate
+          //check if MailBoxAddr exceeds the 12 bits of the Immediate
           if(MailBoxAddr >= 4096){
 
             //LUI required
-            BuildMI(MBB, MI, DL, TII->get(RISCV::LUI), UI_MailBoxAddr) 
+            BuildMI(MBB, MI, DL, TII->get(RISCV::LUI), UI_MailBoxAddr)
               .addImm(MailBoxAddr); 
           
           }else{
-            Register UI_MailBoxAddr = RISCV::X0; 
-          }*/
+            UI_MailBoxAddr = RISCV::X0; 
+          }
          
           //this SD is inserted before the call takes place
           BuildMI(MBB, MI, DL, TII->get(RISCV::SD), RISCV::X1) 
-              .addReg(RISCV::X0)
+              .addReg(UI_MailBoxAddr)
               .addImm(MailBoxAddr); 
 
 
@@ -127,7 +135,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
 
           //write call id = 1 to mailbox
           BuildMI(MBB, MI, DL, TII->get(RISCV::SD), Reg_call_ID)
-              .addReg(RISCV::X0)
+              .addReg(UI_MailBoxAddr)
               .addImm(MailBoxAddr+8);
 
         } //end if isCall
@@ -135,6 +143,12 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
         // Store the correct Return Address when returning from a call
         // Decide if this should be done also for the main ret
         if(MI.isReturn()){
+
+          /*StringRef fnName = MF.getFunctionName().getName();
+
+          if(!MainRet && get == main){
+            exit();
+          }else{*/
 
           //if a RETURN is detected
           #ifdef CRA_DEBUG
@@ -145,20 +159,20 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
           //register to load upper immediate of the MailBoxAddr. Random initialization
           //Register UI_MailBoxAddr = MI.getOperand(1).getReg(); 
 
-          /*//check if MailBoxAddr exceeds the 12 bits of the Immediate
+          //check if MailBoxAddr exceeds the 12 bits of the Immediate
           if(MailBoxAddr >= 4096){
 
             //LUI required
             BuildMI(MBB, MI, DL, TII->get(RISCV::LUI), UI_MailBoxAddr) 
               .addImm(MailBoxAddr); 
           
-          }/*else{
-            Register UI_MailBoxAddr = RISCV::X0; 
-          }*/
+          }else{
+            UI_MailBoxAddr = RISCV::X0; 
+          }
          
           //this SD restores the correct ra before ret takes place    
           BuildMI(MBB, MI, DL, TII->get(RISCV::SD), RISCV::X1) 
-              .addReg(RISCV::X0)
+              .addReg(UI_MailBoxAddr)
               .addImm(MailBoxAddr);
 
           #ifdef CRA_DEBUG
@@ -166,9 +180,11 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
           #endif
   
           //write ret id = 0 to mailbox
-          BuildMI(MBB, MI, DL, TII->get(RISCV::SD), RISCV::X0)
-              .addReg(RISCV::X0)
+          BuildMI(MBB, MI, DL, TII->get(RISCV::SD), UI_MailBoxAddr)
+              .addReg(UI_MailBoxAddr)
               .addImm(MailBoxAddr+8);
+
+          }
         }
     }
   }
