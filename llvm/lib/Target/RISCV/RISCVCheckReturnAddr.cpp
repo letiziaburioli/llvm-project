@@ -32,11 +32,12 @@ static cl::opt<int> MailBoxAddr(
   cl::desc("Specify MailBox Address"),
   cl::value_desc("mailbox address")
 );
-/*add CommandLine option -main-ret to decide if the pas should 
+
+/*add CommandLine option -main-ret to decide if the pass should 
 be applied also to the ret of the main function */
 static cl::opt<int> MainRet(
   "main-ret",
-  cl::init(1), //(0x0008BEAF),
+  cl::init(1), 
   cl::desc("Apply Pass to ret of main function"),
   cl::value_desc("protect main ret")
 );
@@ -106,9 +107,11 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
 
           //check if MailBoxAddr exceeds the 12 bits of the Immediate
           if(MailBoxAddr >= 4096){
-
+            
             //LUI required
-            BuildMI(MBB, MI, DL, TII->get(RISCV::LUI), UI_MailBoxAddr)
+            //int64_t Hi20 = ((MailBoxAddr + 0x800) >> 12) & 0xFFFFF;
+            //BuildMI(MBB, MI, DL, TII->get(RISCV::LUI, Hi20));
+            BuildMI(MBB, MI, DL, TII->get(RISCV::LUI), RISCV::X5)
               .addImm(MailBoxAddr); 
           
           }else{
@@ -117,7 +120,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
          
           //this SD is inserted before the call takes place
           BuildMI(MBB, MI, DL, TII->get(RISCV::SD), RISCV::X1) 
-              .addReg(UI_MailBoxAddr)
+              .addReg(RISCV::X5)
               .addImm(MailBoxAddr); 
 
 
@@ -135,7 +138,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
 
           //write call id = 1 to mailbox
           BuildMI(MBB, MI, DL, TII->get(RISCV::SD), Reg_call_ID)
-              .addReg(UI_MailBoxAddr)
+              .addReg(RISCV::X5)
               .addImm(MailBoxAddr+8);
 
         } //end if isCall
@@ -144,11 +147,13 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
         // Decide if this should be done also for the main ret
         if(MI.isReturn()){
 
-          /*StringRef fnName = MF.getFunctionName().getName();
-
-          if(!MainRet && get == main){
-            exit();
-          }else{*/
+          StringRef fnName = MF.getFunction().getName();
+       
+          if(!MainRet && fnName == "main"){
+            std::cout << "Optimization pass not executed for main ret " << "\n";
+            exit;
+            
+          }else{
 
           //if a RETURN is detected
           #ifdef CRA_DEBUG
@@ -157,13 +162,13 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
           #endif     
 
           //register to load upper immediate of the MailBoxAddr. Random initialization
-          //Register UI_MailBoxAddr = MI.getOperand(1).getReg(); 
+          Register UI_MailBoxAddr = MI.getOperand(1).getReg(); 
 
           //check if MailBoxAddr exceeds the 12 bits of the Immediate
           if(MailBoxAddr >= 4096){
 
-            //LUI required
-            BuildMI(MBB, MI, DL, TII->get(RISCV::LUI), UI_MailBoxAddr) 
+            //LUI required. RISCV::X5: temporary register 0
+            BuildMI(MBB, MI, DL, TII->get(RISCV::LUI), RISCV::X5) 
               .addImm(MailBoxAddr); 
           
           }else{
@@ -172,7 +177,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
          
           //this SD restores the correct ra before ret takes place    
           BuildMI(MBB, MI, DL, TII->get(RISCV::SD), RISCV::X1) 
-              .addReg(UI_MailBoxAddr)
+              .addReg(RISCV::X5)
               .addImm(MailBoxAddr);
 
           #ifdef CRA_DEBUG
@@ -180,21 +185,22 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
           #endif
   
           //write ret id = 0 to mailbox
-          BuildMI(MBB, MI, DL, TII->get(RISCV::SD), UI_MailBoxAddr)
+          BuildMI(MBB, MI, DL, TII->get(RISCV::SD), RISCV::X0)
               .addReg(UI_MailBoxAddr)
               .addImm(MailBoxAddr+8);
 
-          }
-        }
-    }
-  }
+          } //end else for main ret
+        }//end isReturn
+    }//end second loop
+}//end first loop
 
 #ifdef CRA_DEBUG
 std::cout << "Checked: " << Checked << "\n";
 #endif
 
 return Checked;
-}
+}//end CheckReturnAddr
+
 
 FunctionPass *llvm::createRISCVCheckReturnAddrPass() {
   return new RISCVCheckReturnAddr();
