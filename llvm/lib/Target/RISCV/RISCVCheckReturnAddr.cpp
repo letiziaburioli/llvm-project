@@ -92,7 +92,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
         const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo(); //defined to use it later in the BuildMI
 
         //register to load upper immediate of the MailBoxAddr. Random initialization
-        Register UI_MailBoxAddr = MI.getOperand(0).getReg(); //RISCV::X0; 
+        Register UI_MailBoxAddr = MI.getOperand(0).getReg(); 
         
         if(MI.isCall()){
         
@@ -111,7 +111,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
             //LUI required
             //int64_t Hi20 = ((MailBoxAddr + 0x800) >> 12) & 0xFFFFF;
             //BuildMI(MBB, MI, DL, TII->get(RISCV::LUI, Hi20));
-            BuildMI(MBB, MI, DL, TII->get(RISCV::LUI), RISCV::X5)
+            BuildMI(MBB, MI, DL, TII->get(RISCV::LUI), UI_MailBoxAddr)
               .addImm(MailBoxAddr); 
           
           }else{
@@ -120,7 +120,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
          
           //this SD is inserted before the call takes place
           BuildMI(MBB, MI, DL, TII->get(RISCV::SD), RISCV::X1) 
-              .addReg(RISCV::X5)
+              .addReg(UI_MailBoxAddr)
               .addImm(MailBoxAddr); 
 
 
@@ -138,19 +138,20 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
 
           //write call id = 1 to mailbox
           BuildMI(MBB, MI, DL, TII->get(RISCV::SD), Reg_call_ID)
-              .addReg(RISCV::X5)
+              .addReg(UI_MailBoxAddr)
               .addImm(MailBoxAddr+8);
 
         } //end if isCall
         
         // Store the correct Return Address when returning from a call
-        // Decide if this should be done also for the main ret
         if(MI.isReturn()){
 
+          //get function name to identify main function
           StringRef fnName = MF.getFunction().getName();
        
+          //if MainRet == 0 and fnName == "main", don't execute the pass for the ret
           if(!MainRet && fnName == "main"){
-            std::cout << "Optimization pass not executed for main ret " << "\n";
+            std::cout << "Optimization pass not executed for main ret" << "\n";
             exit;
             
           }else{
@@ -168,7 +169,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
           if(MailBoxAddr >= 4096){
 
             //LUI required. RISCV::X5: temporary register 0
-            BuildMI(MBB, MI, DL, TII->get(RISCV::LUI), RISCV::X5) 
+            BuildMI(MBB, MI, DL, TII->get(RISCV::LUI), UI_MailBoxAddr) 
               .addImm(MailBoxAddr); 
           
           }else{
@@ -177,7 +178,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
          
           //this SD restores the correct ra before ret takes place    
           BuildMI(MBB, MI, DL, TII->get(RISCV::SD), RISCV::X1) 
-              .addReg(RISCV::X5)
+              .addReg(UI_MailBoxAddr)
               .addImm(MailBoxAddr);
 
           #ifdef CRA_DEBUG
