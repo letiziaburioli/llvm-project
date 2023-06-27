@@ -43,26 +43,6 @@ define dso_local signext i32 @TestFunction2(i32 signext %0, i32 signext %1) #0 {
 }
 
 ; Function Attrs: noinline nounwind optnone
-define dso_local signext i32 @TestFunction1(i32 signext %0, i32 signext %1) #0 {
-  %3 = alloca i32, align 4
-  %4 = alloca i32, align 4
-  %5 = alloca i32, align 4
-  %6 = alloca i32, align 4
-  store i32 %0, i32* %3, align 4
-  store i32 %1, i32* %4, align 4
-  %7 = load i32, i32* %3, align 4
-  %8 = load i32, i32* %4, align 4
-  %9 = call signext i32 @TestFunction2(i32 signext %7, i32 signext %8)
-  store i32 %9, i32* %5, align 4
-  %10 = load i32, i32* %5, align 4
-  %11 = load i32, i32* %4, align 4
-  %12 = add nsw i32 %10, %11
-  store i32 %12, i32* %6, align 4
-  %13 = load i32, i32* %6, align 4
-  ret i32 %13
-}
-
-; Function Attrs: noinline nounwind optnone
 define dso_local signext i32 @main() #0 {
   %1 = alloca i32, align 4
   %2 = alloca i32, align 4
@@ -89,7 +69,7 @@ define dso_local signext i32 @main() #0 {
   store i32 %13, i32* %3, align 4
   %14 = load i32, i32* %2, align 4
   %15 = load i32, i32* %3, align 4
-  %16 = call signext i32 @TestFunction1(i32 signext %14, i32 signext %15)
+  %16 = call signext i32 @TestFunction2(i32 signext %14, i32 signext %15)
   store i32 %16, i32* %5, align 4
   br label %17
 
