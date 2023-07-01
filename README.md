@@ -18,11 +18,11 @@ Taken from [here](https://llvm.org/docs/GettingStarted.html).
 Welcome to the Andi and Letizia's LLVM project!
 
 ### Commands
-cd llvm
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=RISCV
-cmake --build build
-cd ..
-clang -target riscv64-unknown-elf -O0 -S -o - testFunction.c
+cd llvm  
+cmake -B build -G Ninja -DLLVM_ENABLE_PROJECTS="clang" -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=RISCV  
+cmake --build build  
+cd ..  
+llvm/build/bin/clang -target riscv64-unknown-elf -O0 -S -o - testFunction.c  
 
 #clang -target riscv64-unknown-elf -O0 --debug -S -emit-llvm testFunction.c
 #llvm/build/bin/llc testFunction.bc -o - -m 10

@@ -86,16 +86,21 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
   bool Checked = false; //default value if no function is called
 
 
-  for(auto &MBB:MF){
+  for(auto &MBB : MF){
 
-    for(auto &MI:MBB){
+    for(auto &MI : MBB){
 
         const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo(); //defined to use it later in the BuildMI
 
+	// GIUSEPPE: I introduced this flag to make the pass compatile with both RV32 and RV64
+	const auto &STI = MF.getSubtarget<RISCVSubtarget>();
+	bool IsRV64 = STI.hasFeature(RISCV::Feature64Bit);
+
         //register to load upper immediate of the MailBoxAddr. Random initialization
-        Register Reg64_MailBoxAddr = MI.getOperand(1).getReg(); 
+	// GIUSEPPE: Using a temporary register (if need this must be saved before the call)
+        Register Reg64_MailBoxAddr = RISCV::X6; //MI.getOperand(1).getReg(); 
         
-        if(MI.isCall()){ //if a CALL is detected
+        if(MI.isCall()) { //if a CALL is detected
         
           Checked = true;
 
@@ -118,16 +123,18 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
             int32_t MailBoxAddr_20MSB_fixed = ((MailBoxAddr >> 11) & 0x00000001) ? (MailBoxAddr_20MSB + 0x800) : MailBoxAddr_20MSB;  //add 2048 when needed
             
             int32_t MailBoxAddr_12LSB = MailBoxAddr & 0x00000FFF; //select 12 LSB of MailBoxAddr
-            
+
             //LUI + ADDI required
             //LUI
             BuildMI(MBB, MI, DL, TII->get(RISCV::LUI), Reg64_MailBoxAddr)
               .addImm(MailBoxAddr_20MSB_fixed); 
 
             //ADDI
-            BuildMI(MBB, MI, DL, TII->get(RISCV::ADDIW), Reg64_MailBoxAddr) 
-              .addReg(Reg64_MailBoxAddr)
-              .addImm(MailBoxAddr_12LSB); 
+            //BuildMI(MBB, MI, DL, TII->get(RISCV::ADDIW), Reg64_MailBoxAddr) 
+            //  .addReg(Reg64_MailBoxAddr)
+            //  .addImm(MailBoxAddr_12LSB); 
+	    //  GIUSEPPE: We don't need to materialize an ADDI instruction because we can directly use the offset field of the store instruction
+	    offset = MailBoxAddr_12LSB;
 
           
           }else{
@@ -136,7 +143,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
           }
          
           //this SD is inserted before the call takes place
-          BuildMI(MBB, MI, DL, TII->get(RISCV::SD), RISCV::X1) 
+          BuildMI(MBB, MI, DL, TII->get(IsRV64? RISCV::SD : RISCV::SW), RISCV::X1) 
               .addReg(Reg64_MailBoxAddr)
               .addImm(offset); 
 
@@ -146,15 +153,16 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
           #endif
           
           //register to store function ID
-          Register Reg_call_ID = MI.getOperand(1).getReg(); //can't be the same as before
+	  // GIUSEPPE: Using a second temporary register
+          Register Reg_call_ID =  RISCV::X7; //MI.getOperand(1).getReg(); //can't be the same as before
 
           //set call id = 1. This ADDI is turned into a li by the compiler
-          BuildMI(MBB, MI, DL, TII->get(RISCV::ADDIW), Reg_call_ID)
+          BuildMI(MBB, MI, DL, TII->get(IsRV64? RISCV::ADDIW : RISCV::ADDI), Reg_call_ID)
               .addReg(RISCV::X0)
               .addImm(1);
 
           //write call id = 1 to mailbox
-          BuildMI(MBB, MI, DL, TII->get(RISCV::SD), Reg_call_ID)
+          BuildMI(MBB, MI, DL, TII->get(IsRV64? RISCV::SD : RISCV::SW), Reg_call_ID)
               .addReg(Reg64_MailBoxAddr)
               .addImm(offset+8);
 
@@ -162,7 +170,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
         
         //store the correct Return Address when returning from a call
 
-        if(MI.isReturn()){ //if a RETURN is detected
+        if( MI.isReturn()){ //if a RETURN is detected
 
           //get function name to identify main function
           StringRef fnName = MF.getFunction().getName();
@@ -180,7 +188,8 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
           #endif     
 
           //register to load upper immediate of the MailBoxAddr. Random initialization
-          Register Reg64_MailBoxAddr = MI.getOperand(1).getReg(); 
+	  // GIUSEPPE: Using a temporary register (if need this must be saved before the call)
+          Register Reg64_MailBoxAddr = RISCV::X6; //MI.getOperand(1).getReg(); 
 
           int64_t offset = 0;
 
@@ -200,9 +209,11 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
               .addImm(MailBoxAddr_20MSB_fixed); 
 
             //ADDI
-            BuildMI(MBB, MI, DL, TII->get(RISCV::ADDIW), Reg64_MailBoxAddr) 
-              .addReg(Reg64_MailBoxAddr)
-              .addImm(MailBoxAddr_12LSB); 
+            //BuildMI(MBB, MI, DL, TII->get(RISCV::ADDIW), Reg64_MailBoxAddr) 
+            //  .addReg(Reg64_MailBoxAddr)
+            //  .addImm(MailBoxAddr_12LSB); 
+	    //  GIUSEPPE: We don't need to materialize an ADDI instruction because we can directly use the offset field of the store instruction
+            offset = MailBoxAddr_12LSB;
           
           }else{
             Reg64_MailBoxAddr = RISCV::X0; 
@@ -210,7 +221,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
           }
          
           //this SD restores the correct ra before ret takes place    
-          BuildMI(MBB, MI, DL, TII->get(RISCV::SD), RISCV::X1) 
+          BuildMI(MBB, MI, DL, TII->get(IsRV64? RISCV::SD : RISCV::SW), RISCV::X1) 
               .addReg(Reg64_MailBoxAddr)
               .addImm(offset);
 
@@ -219,7 +230,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
           #endif
   
           //write ret id = 0 to mailbox
-          BuildMI(MBB, MI, DL, TII->get(RISCV::SD), RISCV::X0)
+          BuildMI(MBB, MI, DL, TII->get(IsRV64? RISCV::SD : RISCV::SW), RISCV::X0)
               .addReg(Reg64_MailBoxAddr)
               .addImm(offset+8);
 
