@@ -17,12 +17,11 @@
 #include "llvm/CodeGen/TargetRegisterInfo.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/ADT/SmallSet.h"
-#include "llvm/ADT/Statistic.h"
 #include <iostream>
 #include "llvm/Support/CommandLine.h"
 
-//if defined, enable debug comments
-#define CRA_DEBUG
+
+#define CRA_DEBUG //if defined, enable debug comments
 
 using namespace llvm;
 
@@ -92,17 +91,16 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
 
         const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo(); //defined to use it later in the BuildMI
 
-	// GIUSEPPE: I introduced this flag to make the pass compatile with both RV32 and RV64
-	const auto &STI = MF.getSubtarget<RISCVSubtarget>();
-	bool IsRV64 = STI.hasFeature(RISCV::Feature64Bit);
+	      //make the pass compatible with both RV32 and RV64
+	      const auto &STI = MF.getSubtarget<RISCVSubtarget>();
+	      bool IsRV64 = STI.hasFeature(RISCV::Feature64Bit);
 
-        //register to load upper immediate of the MailBoxAddr. Random initialization
-	// GIUSEPPE: Using a temporary register (if need this must be saved before the call)
-        Register Reg64_MailBoxAddr = RISCV::X6; //MI.getOperand(1).getReg(); 
+        //use a temporary register to load upper immediate of the MailBoxAddr
+        Register Reg64_MailBoxAddr = RISCV::X6;
         
         if(MI.isCall()) { //if a CALL is detected
         
-          Checked = true;
+          Checked = true; //at least a call detected
 
           #ifdef CRA_DEBUG
           countCall++;
@@ -115,26 +113,18 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
 
           if(MailBoxAddr >= 4096){
 
-            //0x800 = 2048 = 2^11
-            //MailBoxAddr_20MSB_fixed + 2048 to compensate unwanted ADDI sign extension  
-            
             int32_t MailBoxAddr_20MSB = MailBoxAddr & 0xFFFFF000; //select 20 MSB of MailBoxAddr
 
             int32_t MailBoxAddr_20MSB_fixed = ((MailBoxAddr >> 11) & 0x00000001) ? (MailBoxAddr_20MSB + 0x800) : MailBoxAddr_20MSB;  //add 2048 when needed
             
             int32_t MailBoxAddr_12LSB = MailBoxAddr & 0x00000FFF; //select 12 LSB of MailBoxAddr
 
-            //LUI + ADDI required
-            //LUI
+            //LUI required
             BuildMI(MBB, MI, DL, TII->get(RISCV::LUI), Reg64_MailBoxAddr)
               .addImm(MailBoxAddr_20MSB_fixed); 
 
-            //ADDI
-            //BuildMI(MBB, MI, DL, TII->get(RISCV::ADDIW), Reg64_MailBoxAddr) 
-            //  .addReg(Reg64_MailBoxAddr)
-            //  .addImm(MailBoxAddr_12LSB); 
-	    //  GIUSEPPE: We don't need to materialize an ADDI instruction because we can directly use the offset field of the store instruction
-	    offset = MailBoxAddr_12LSB;
+
+	          offset = MailBoxAddr_12LSB;
 
           
           }else{
@@ -152,9 +142,8 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
           outs() << "Inserted SD for ra\n";
           #endif
           
-          //register to store function ID
-	  // GIUSEPPE: Using a second temporary register
-          Register Reg_call_ID =  RISCV::X7; //MI.getOperand(1).getReg(); //can't be the same as before
+          //temporary register to store function ID
+          Register Reg_call_ID =  RISCV::X7; 
 
           //set call id = 1. This ADDI is turned into a li by the compiler
           BuildMI(MBB, MI, DL, TII->get(IsRV64? RISCV::ADDIW : RISCV::ADDI), Reg_call_ID)
@@ -187,15 +176,14 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
           std::cout << "Return n. " << countReturn << "\n";     
           #endif     
 
-          //register to load upper immediate of the MailBoxAddr. Random initialization
-	  // GIUSEPPE: Using a temporary register (if need this must be saved before the call)
-          Register Reg64_MailBoxAddr = RISCV::X6; //MI.getOperand(1).getReg(); 
+          //temporary register to load upper immediate of the MailBoxAddr
+          Register Reg64_MailBoxAddr = RISCV::X6; 
 
           int64_t offset = 0;
 
           //check if MailBoxAddr exceeds the 12 bits of the Immediate
 
-          if(MailBoxAddr >= 4096){ //LUI + ADDI required
+          if(MailBoxAddr >= 4096){ //LUI required
 
             int32_t MailBoxAddr_20MSB = MailBoxAddr & 0xFFFFF000; //select 20 MSB of MailBoxAddr
 
@@ -208,11 +196,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
             BuildMI(MBB, MI, DL, TII->get(RISCV::LUI), Reg64_MailBoxAddr)
               .addImm(MailBoxAddr_20MSB_fixed); 
 
-            //ADDI
-            //BuildMI(MBB, MI, DL, TII->get(RISCV::ADDIW), Reg64_MailBoxAddr) 
-            //  .addReg(Reg64_MailBoxAddr)
-            //  .addImm(MailBoxAddr_12LSB); 
-	    //  GIUSEPPE: We don't need to materialize an ADDI instruction because we can directly use the offset field of the store instruction
+            
             offset = MailBoxAddr_12LSB;
           
           }else{
@@ -234,14 +218,11 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
               .addReg(Reg64_MailBoxAddr)
               .addImm(offset+8);
 
-          } //end else for main ret
+          }//end "else" of mainRet 
         }//end isReturn
-    }//end second loop
-}//end first loop
+    }//end second loop on &MI
+}//end first loop on &MBB
 
-#ifdef CRA_DEBUG
-std::cout << "Checked: " << Checked << "\n";
-#endif
 
 return Checked;
 }//end CheckReturnAddr

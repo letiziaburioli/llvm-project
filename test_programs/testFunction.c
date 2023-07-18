@@ -17,13 +17,22 @@ int TestFunction2(){
 	return myMul;
 }
 
+int TestFunction3(int e){
+	int f = 37;
+	int myRes = (e * f) + 10;
+	
+	return myRes;
+}
+
 int main(){
 
 	int Sum = TestFunction1(); //call function 1
 	
 	int Prod = TestFunction2(); //call function 2
 	
-	int Res = Sum + Prod;
+	int Res = TestFunction3(Prod); //call function 3
+	
+	int Res_final = Sum + Prod + Res;
 	
 	return 0;
 }

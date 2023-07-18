@@ -25,7 +25,7 @@ cd ..
 llvm/build/bin/clang -target riscv64-unknown-elf -O0 -S -o - testFunction.c  
 
 #clang -target riscv64-unknown-elf -O0 --debug -S -emit-llvm testFunction.c
-#llvm/build/bin/llc testFunction.bc -o - -m 10
+#llvm/build/bin/llc testFunction.bc -o - -mailbox-offset 10
 
 
 The LLVM project has multiple components. The core of the project is
