@@ -14,9 +14,15 @@ take a look at the
 Taken from [here](https://llvm.org/docs/GettingStarted.html).
 
 ### Overview
-
 Welcome to Andi and Letizia's LLVM project!
 The purpose of our project is to reproduce a CFI protection mechanism. We considered a situation in which during a program execution a function call is reached, the control is transferred to its routine and its instructions are executed. After the execution of the function code, the return instruction is supposed to let the execution flow go back to the address immediately after the function call. Our purpose is to ensure that the return address is the originally intended one, avoiding instruction flow modification from malicious attackers which could modify it thus provoking the execution of some potentially dangerous code. 
+
+### Writing a new optimization pass for a RISCV Target Architecture
+The RISCVCheckReturnAddr.cpp file containing our pass has been written in /Target/RISCV and added into the BUILD.gn file to include it in the compiler backend.
+
+### How does our pass work 
+Our optimization pass inserts two store instructions before any function call and before every return in the source code. The first one stores the return address contained in the register RISCV::X1 to the mailbox address (MailBoxAddr), whereas the second one is used to store an identifier in the following memory location (MailBoxAddr + 4 for RISCV32 and MailBoxAddr + 8 for RISCV64 architecture). The identifier allows to distinguish a call from a return and will be used by hardware entitled of making the comparison. 
+    The pass also manages MailBoxAddr values greater than the 12 bits of the Immediate field, thanks to a LUI instruction (the sign extension automatically performed by the LUI is compensated).  
 
 
 ### Commands to build LLVM
@@ -29,10 +35,14 @@ cmake --build build
 cd ..  
 llvm/build/bin/clang -target riscv64-unknown-elf -O0 -S -emit-llvm testFunction.c -o testFunction.bc
 
-### Run llc with our pass on testFunction.bc and specify the pass CLI options
+### Run llc with our pass on testFunction.bc and specify the pass CLI options: -mailbox-offset allows the user to set a desired value 
+### for MailBoxAddr, whereas -main-ret defines whether the pass should be applied also to the main function return or not.
 llvm/build/bin/llc testFunction.bc -o - -mailbox-offset 10 -main-ret 1
 
 
+
+
+----- DEFAULT README.md -----
 The LLVM project has multiple components. The core of the project is
 itself called "LLVM". This contains all of the tools, libraries, and header
 files needed to process intermediate representations and convert them into
