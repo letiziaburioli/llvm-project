@@ -75,7 +75,6 @@ int countMF = 0;
 int countReturn = 0;
 #endif 
 
-
 bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
   #ifdef CRA_DEBUG
   countMF++;
@@ -101,6 +100,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
         if(MI.isCall()) { //if a CALL is detected
         
           Checked = true; //at least a call detected
+
 
           #ifdef CRA_DEBUG
           countCall++;
@@ -139,7 +139,7 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
 
 
           #ifdef CRA_DEBUG
-          outs() << "Inserted SD for ra\n";
+          outs() << "Inserted SW/SD for ra\n";
           #endif
           
           //temporary register to store function ID
@@ -151,15 +151,21 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
               .addImm(1);
 
           //write call id = 1 to mailbox
-          BuildMI(MBB, MI, DL, TII->get(IsRV64? RISCV::SD : RISCV::SW), Reg_call_ID)
+          if (IsRV64 == true){ //RISCV64
+            BuildMI(MBB, MI, DL, TII->get(RISCV::SD), Reg_call_ID)
               .addReg(Reg64_MailBoxAddr)
-              .addImm(offset+8);
+              .addImm(offset + 8);
+          } else { //RISCV32
+            BuildMI(MBB, MI, DL, TII->get(RISCV::SW), Reg_call_ID)
+              .addReg(Reg64_MailBoxAddr)
+              .addImm(offset + 4);
+          }
 
         } //end if isCall
         
         //store the correct Return Address when returning from a call
 
-        if( MI.isReturn()){ //if a RETURN is detected
+        if(MI.isReturn()){ //if a RETURN is detected
 
           //get function name to identify main function
           StringRef fnName = MF.getFunction().getName();
@@ -210,13 +216,19 @@ bool RISCVCheckReturnAddr::runOnMachineFunction(MachineFunction &MF){
               .addImm(offset);
 
           #ifdef CRA_DEBUG
-          outs() << "Inserted LW for ra\n"; //print message
+          outs() << "Inserted SW/SD for ra\n"; //print message
           #endif
   
           //write ret id = 0 to mailbox
-          BuildMI(MBB, MI, DL, TII->get(IsRV64? RISCV::SD : RISCV::SW), RISCV::X0)
+          if(IsRV64 == true){ //RISCV64
+            BuildMI(MBB, MI, DL, TII->get(RISCV::SD), RISCV::X0)
               .addReg(Reg64_MailBoxAddr)
               .addImm(offset+8);
+          } else { //RISCV32
+            BuildMI(MBB, MI, DL, TII->get(RISCV::SW), RISCV::X0)
+              .addReg(Reg64_MailBoxAddr)
+              .addImm(offset+4);
+          }
 
           }//end "else" of mainRet 
         }//end isReturn

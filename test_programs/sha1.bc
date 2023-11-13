@@ -1,0 +1,781 @@
+	.text
+	.attribute	4, 16
+	.attribute	5, "rv64i2p0_m2p0_a2p0_c2p0"
+	.file	"sha1.c"
+	.section	.sdata,"aw",@progbits
+	.p2align	3
+.LCPI0_0:
+	.quad	-3863312403062342436
+.LCPI0_1:
+	.quad	7987674492359047577
+	.text
+	.globl	message_block_process
+	.p2align	1
+	.type	message_block_process,@function
+message_block_process:
+	addi	sp, sp, -400
+	sd	ra, 392(sp)
+	sd	s0, 384(sp)
+	addi	s0, sp, 400
+	sd	a0, -24(s0)
+	lui	a0, %hi(.LCPI0_0)
+	ld	a0, %lo(.LCPI0_0)(a0)
+	sd	a0, -32(s0)
+	lui	a0, %hi(.LCPI0_1)
+	ld	a0, %lo(.LCPI0_1)(a0)
+	sd	a0, -40(s0)
+	li	a0, 0
+	sw	a0, -44(s0)
+	j	.LBB0_1
+.LBB0_1:
+	lw	a1, -44(s0)
+	li	a0, 15
+	blt	a0, a1, .LBB0_4
+	j	.LBB0_2
+.LBB0_2:
+	ld	a1, -24(s0)
+	lw	a0, -44(s0)
+	slliw	a2, a0, 2
+	add	a1, a1, a2
+	lb	a1, 28(a1)
+	slliw	a1, a1, 24
+	slli	a2, a0, 2
+	addi	a0, s0, -368
+	add	a2, a2, a0
+	sw	a1, 0(a2)
+	ld	a2, -24(s0)
+	lw	a1, -44(s0)
+	slliw	a3, a1, 2
+	add	a2, a2, a3
+	lbu	a2, 29(a2)
+	slli	a3, a2, 16
+	slli	a1, a1, 2
+	add	a2, a0, a1
+	lw	a1, 0(a2)
+	or	a1, a1, a3
+	sw	a1, 0(a2)
+	ld	a2, -24(s0)
+	lw	a1, -44(s0)
+	slliw	a3, a1, 2
+	add	a2, a2, a3
+	lbu	a2, 30(a2)
+	slli	a3, a2, 8
+	slli	a1, a1, 2
+	add	a2, a0, a1
+	lw	a1, 0(a2)
+	or	a1, a1, a3
+	sw	a1, 0(a2)
+	ld	a2, -24(s0)
+	lw	a1, -44(s0)
+	slliw	a3, a1, 2
+	add	a2, a2, a3
+	lbu	a2, 31(a2)
+	slli	a1, a1, 2
+	add	a1, a1, a0
+	lw	a0, 0(a1)
+	or	a0, a0, a2
+	sw	a0, 0(a1)
+	j	.LBB0_3
+.LBB0_3:
+	lw	a0, -44(s0)
+	addiw	a0, a0, 1
+	sw	a0, -44(s0)
+	j	.LBB0_1
+.LBB0_4:
+	li	a0, 16
+	sw	a0, -44(s0)
+	j	.LBB0_5
+.LBB0_5:
+	lw	a1, -44(s0)
+	li	a0, 79
+	blt	a0, a1, .LBB0_8
+	j	.LBB0_6
+.LBB0_6:
+	lw	a2, -44(s0)
+	addiw	a0, a2, -3
+	slli	a0, a0, 2
+	addi	a1, s0, -368
+	add	a0, a0, a1
+	lw	a0, 0(a0)
+	addiw	a3, a2, -8
+	slli	a3, a3, 2
+	add	a3, a3, a1
+	lw	a3, 0(a3)
+	xor	a0, a0, a3
+	addiw	a3, a2, -14
+	slli	a3, a3, 2
+	add	a3, a3, a1
+	lw	a3, 0(a3)
+	xor	a0, a0, a3
+	addiw	a3, a2, -16
+	slli	a3, a3, 2
+	add	a3, a3, a1
+	lw	a3, 0(a3)
+	xor	a0, a0, a3
+	srliw	a3, a0, 31
+	slli	a0, a0, 1
+	or	a0, a0, a3
+	slli	a2, a2, 2
+	add	a1, a1, a2
+	sw	a0, 0(a1)
+	j	.LBB0_7
+.LBB0_7:
+	lw	a0, -44(s0)
+	addiw	a0, a0, 1
+	sw	a0, -44(s0)
+	j	.LBB0_5
+.LBB0_8:
+	ld	a0, -24(s0)
+	lw	a0, 0(a0)
+	sw	a0, -372(s0)
+	ld	a0, -24(s0)
+	lw	a0, 4(a0)
+	sw	a0, -376(s0)
+	ld	a0, -24(s0)
+	lw	a0, 8(a0)
+	sw	a0, -380(s0)
+	ld	a0, -24(s0)
+	lw	a0, 12(a0)
+	sw	a0, -384(s0)
+	ld	a0, -24(s0)
+	lw	a0, 16(a0)
+	sw	a0, -388(s0)
+	li	a0, 0
+	sw	a0, -44(s0)
+	j	.LBB0_9
+.LBB0_9:
+	lw	a1, -44(s0)
+	li	a0, 19
+	blt	a0, a1, .LBB0_12
+	j	.LBB0_10
+.LBB0_10:
+	lw	a0, -372(s0)
+	srliw	a1, a0, 27
+	slli	a0, a0, 5
+	or	a0, a0, a1
+	lw	a2, -376(s0)
+	lw	a1, -380(s0)
+	and	a1, a1, a2
+	not	a2, a2
+	lw	a3, -384(s0)
+	and	a2, a2, a3
+	or	a1, a1, a2
+	addw	a0, a0, a1
+	lw	a1, -388(s0)
+	addw	a0, a0, a1
+	lw	a1, -44(s0)
+	slli	a2, a1, 2
+	addi	a1, s0, -368
+	add	a1, a1, a2
+	lw	a1, 0(a1)
+	addw	a0, a0, a1
+	lw	a1, -40(s0)
+	addw	a0, a0, a1
+	sw	a0, -48(s0)
+	lw	a0, -384(s0)
+	sw	a0, -388(s0)
+	lw	a0, -380(s0)
+	sw	a0, -384(s0)
+	lw	a0, -376(s0)
+	srliw	a1, a0, 2
+	slli	a0, a0, 30
+	or	a0, a0, a1
+	sw	a0, -380(s0)
+	lw	a0, -372(s0)
+	sw	a0, -376(s0)
+	lw	a0, -48(s0)
+	sw	a0, -372(s0)
+	j	.LBB0_11
+.LBB0_11:
+	lw	a0, -44(s0)
+	addiw	a0, a0, 1
+	sw	a0, -44(s0)
+	j	.LBB0_9
+.LBB0_12:
+	li	a0, 20
+	sw	a0, -44(s0)
+	j	.LBB0_13
+.LBB0_13:
+	lw	a1, -44(s0)
+	li	a0, 39
+	blt	a0, a1, .LBB0_16
+	j	.LBB0_14
+.LBB0_14:
+	lw	a0, -372(s0)
+	srliw	a1, a0, 27
+	slli	a0, a0, 5
+	or	a0, a0, a1
+	lw	a1, -376(s0)
+	lw	a2, -380(s0)
+	xor	a1, a1, a2
+	lw	a2, -384(s0)
+	xor	a1, a1, a2
+	addw	a0, a0, a1
+	lw	a1, -388(s0)
+	addw	a0, a0, a1
+	lw	a1, -44(s0)
+	slli	a2, a1, 2
+	addi	a1, s0, -368
+	add	a1, a1, a2
+	lw	a1, 0(a1)
+	addw	a0, a0, a1
+	lw	a1, -36(s0)
+	addw	a0, a0, a1
+	sw	a0, -48(s0)
+	lw	a0, -384(s0)
+	sw	a0, -388(s0)
+	lw	a0, -380(s0)
+	sw	a0, -384(s0)
+	lw	a0, -376(s0)
+	srliw	a1, a0, 2
+	slli	a0, a0, 30
+	or	a0, a0, a1
+	sw	a0, -380(s0)
+	lw	a0, -372(s0)
+	sw	a0, -376(s0)
+	lw	a0, -48(s0)
+	sw	a0, -372(s0)
+	j	.LBB0_15
+.LBB0_15:
+	lw	a0, -44(s0)
+	addiw	a0, a0, 1
+	sw	a0, -44(s0)
+	j	.LBB0_13
+.LBB0_16:
+	li	a0, 40
+	sw	a0, -44(s0)
+	j	.LBB0_17
+.LBB0_17:
+	lw	a1, -44(s0)
+	li	a0, 59
+	blt	a0, a1, .LBB0_20
+	j	.LBB0_18
+.LBB0_18:
+	lw	a0, -372(s0)
+	srliw	a1, a0, 27
+	slli	a0, a0, 5
+	or	a0, a0, a1
+	lw	a1, -376(s0)
+	lw	a2, -380(s0)
+	lw	a3, -384(s0)
+	or	a4, a2, a3
+	and	a1, a1, a4
+	and	a2, a2, a3
+	or	a1, a1, a2
+	addw	a0, a0, a1
+	lw	a1, -388(s0)
+	addw	a0, a0, a1
+	lw	a1, -44(s0)
+	slli	a2, a1, 2
+	addi	a1, s0, -368
+	add	a1, a1, a2
+	lw	a1, 0(a1)
+	addw	a0, a0, a1
+	lw	a1, -32(s0)
+	addw	a0, a0, a1
+	sw	a0, -48(s0)
+	lw	a0, -384(s0)
+	sw	a0, -388(s0)
+	lw	a0, -380(s0)
+	sw	a0, -384(s0)
+	lw	a0, -376(s0)
+	srliw	a1, a0, 2
+	slli	a0, a0, 30
+	or	a0, a0, a1
+	sw	a0, -380(s0)
+	lw	a0, -372(s0)
+	sw	a0, -376(s0)
+	lw	a0, -48(s0)
+	sw	a0, -372(s0)
+	j	.LBB0_19
+.LBB0_19:
+	lw	a0, -44(s0)
+	addiw	a0, a0, 1
+	sw	a0, -44(s0)
+	j	.LBB0_17
+.LBB0_20:
+	li	a0, 60
+	sw	a0, -44(s0)
+	j	.LBB0_21
+.LBB0_21:
+	lw	a1, -44(s0)
+	li	a0, 79
+	blt	a0, a1, .LBB0_24
+	j	.LBB0_22
+.LBB0_22:
+	lw	a0, -372(s0)
+	srliw	a1, a0, 27
+	slli	a0, a0, 5
+	or	a0, a0, a1
+	lw	a1, -376(s0)
+	lw	a2, -380(s0)
+	xor	a1, a1, a2
+	lw	a2, -384(s0)
+	xor	a1, a1, a2
+	addw	a0, a0, a1
+	lw	a1, -388(s0)
+	addw	a0, a0, a1
+	lw	a1, -44(s0)
+	slli	a2, a1, 2
+	addi	a1, s0, -368
+	add	a1, a1, a2
+	lw	a1, 0(a1)
+	addw	a0, a0, a1
+	lw	a1, -28(s0)
+	addw	a0, a0, a1
+	sw	a0, -48(s0)
+	lw	a0, -384(s0)
+	sw	a0, -388(s0)
+	lw	a0, -380(s0)
+	sw	a0, -384(s0)
+	lw	a0, -376(s0)
+	srliw	a1, a0, 2
+	slli	a0, a0, 30
+	or	a0, a0, a1
+	sw	a0, -380(s0)
+	lw	a0, -372(s0)
+	sw	a0, -376(s0)
+	lw	a0, -48(s0)
+	sw	a0, -372(s0)
+	j	.LBB0_23
+.LBB0_23:
+	lw	a0, -44(s0)
+	addiw	a0, a0, 1
+	sw	a0, -44(s0)
+	j	.LBB0_21
+.LBB0_24:
+	ld	a1, -24(s0)
+	lw	a0, 0(a1)
+	lw	a2, -372(s0)
+	addw	a0, a0, a2
+	sw	a0, 0(a1)
+	ld	a1, -24(s0)
+	lw	a0, 4(a1)
+	lw	a2, -376(s0)
+	addw	a0, a0, a2
+	sw	a0, 4(a1)
+	ld	a1, -24(s0)
+	lw	a0, 8(a1)
+	lw	a2, -380(s0)
+	addw	a0, a0, a2
+	sw	a0, 8(a1)
+	ld	a1, -24(s0)
+	lw	a0, 12(a1)
+	lw	a2, -384(s0)
+	addw	a0, a0, a2
+	sw	a0, 12(a1)
+	ld	a1, -24(s0)
+	lw	a0, 16(a1)
+	lw	a2, -388(s0)
+	addw	a0, a0, a2
+	sw	a0, 16(a1)
+	ld	a1, -24(s0)
+	li	a0, 0
+	sw	a0, 92(a1)
+	ld	ra, 392(sp)
+	ld	s0, 384(sp)
+	addi	sp, sp, 400
+	sd	ra, 12(zero)
+	sd	zero, 20(zero)
+	ret
+.Lfunc_end0:
+	.size	message_block_process, .Lfunc_end0-message_block_process
+
+	.globl	sha1_imbottitura
+	.p2align	1
+	.type	sha1_imbottitura,@function
+sha1_imbottitura:
+	addi	sp, sp, -32
+	sd	ra, 24(sp)
+	sd	s0, 16(sp)
+	addi	s0, sp, 32
+	sd	a0, -24(s0)
+	ld	a0, -24(s0)
+	lw	a0, 92(a0)
+	li	a1, 56
+	blt	a0, a1, .LBB1_8
+	j	.LBB1_1
+.LBB1_1:
+	ld	a2, -24(s0)
+	lw	a0, 92(a2)
+	add	a1, a2, a0
+	addiw	a0, a0, 1
+	sw	a0, 92(a2)
+	li	a0, 128
+	sb	a0, 28(a1)
+	j	.LBB1_2
+.LBB1_2:
+	ld	a0, -24(s0)
+	lw	a1, 92(a0)
+	li	a0, 63
+	blt	a0, a1, .LBB1_4
+	j	.LBB1_3
+.LBB1_3:
+	ld	a2, -24(s0)
+	lw	a0, 92(a2)
+	add	a1, a2, a0
+	addiw	a0, a0, 1
+	sw	a0, 92(a2)
+	li	a0, 0
+	sb	a0, 28(a1)
+	j	.LBB1_2
+.LBB1_4:
+	ld	a0, -24(s0)
+	sd	ra, 12(zero)
+	li	t2, 1
+	sd	t2, 20(zero)
+	call	message_block_process
+	j	.LBB1_5
+.LBB1_5:
+	ld	a0, -24(s0)
+	lw	a1, 92(a0)
+	li	a0, 55
+	blt	a0, a1, .LBB1_7
+	j	.LBB1_6
+.LBB1_6:
+	ld	a2, -24(s0)
+	lw	a0, 92(a2)
+	add	a1, a2, a0
+	addiw	a0, a0, 1
+	sw	a0, 92(a2)
+	li	a0, 0
+	sb	a0, 28(a1)
+	j	.LBB1_5
+.LBB1_7:
+	j	.LBB1_12
+.LBB1_8:
+	ld	a2, -24(s0)
+	lw	a0, 92(a2)
+	add	a1, a2, a0
+	addiw	a0, a0, 1
+	sw	a0, 92(a2)
+	li	a0, 128
+	sb	a0, 28(a1)
+	j	.LBB1_9
+.LBB1_9:
+	ld	a0, -24(s0)
+	lw	a1, 92(a0)
+	li	a0, 55
+	blt	a0, a1, .LBB1_11
+	j	.LBB1_10
+.LBB1_10:
+	ld	a2, -24(s0)
+	lw	a0, 92(a2)
+	add	a1, a2, a0
+	addiw	a0, a0, 1
+	sw	a0, 92(a2)
+	li	a0, 0
+	sb	a0, 28(a1)
+	j	.LBB1_9
+.LBB1_11:
+	j	.LBB1_12
+.LBB1_12:
+	ld	a1, -24(s0)
+	lb	a0, 27(a1)
+	sb	a0, 84(a1)
+	ld	a1, -24(s0)
+	lb	a0, 26(a1)
+	sb	a0, 85(a1)
+	ld	a1, -24(s0)
+	lb	a0, 25(a1)
+	sb	a0, 86(a1)
+	ld	a1, -24(s0)
+	lb	a0, 24(a1)
+	sb	a0, 87(a1)
+	ld	a1, -24(s0)
+	lb	a0, 23(a1)
+	sb	a0, 88(a1)
+	ld	a1, -24(s0)
+	lb	a0, 22(a1)
+	sb	a0, 89(a1)
+	ld	a1, -24(s0)
+	lb	a0, 21(a1)
+	sb	a0, 90(a1)
+	ld	a1, -24(s0)
+	lb	a0, 20(a1)
+	sb	a0, 91(a1)
+	ld	a0, -24(s0)
+	sd	ra, 12(zero)
+	li	t2, 1
+	sd	t2, 20(zero)
+	call	message_block_process
+	ld	ra, 24(sp)
+	ld	s0, 16(sp)
+	addi	sp, sp, 32
+	sd	ra, 12(zero)
+	sd	zero, 20(zero)
+	ret
+.Lfunc_end1:
+	.size	sha1_imbottitura, .Lfunc_end1-sha1_imbottitura
+
+	.globl	sha1_init
+	.p2align	1
+	.type	sha1_init,@function
+sha1_init:
+	addi	sp, sp, -32
+	sd	ra, 24(sp)
+	sd	s0, 16(sp)
+	addi	s0, sp, 32
+	sd	a0, -24(s0)
+	ld	a1, -24(s0)
+	li	a0, 0
+	sw	a0, 20(a1)
+	ld	a1, -24(s0)
+	sw	a0, 24(a1)
+	ld	a1, -24(s0)
+	sw	a0, 92(a1)
+	ld	a2, -24(s0)
+	lui	a1, 422994
+	addiw	a1, a1, 769
+	sw	a1, 0(a2)
+	ld	a2, -24(s0)
+	lui	a1, 982235
+	addiw	a1, a1, -1143
+	sw	a1, 4(a2)
+	ld	a2, -24(s0)
+	lui	a1, 625582
+	addiw	a1, a1, -770
+	sw	a1, 8(a2)
+	ld	a2, -24(s0)
+	lui	a1, 66341
+	addiw	a1, a1, 1142
+	sw	a1, 12(a2)
+	ld	a2, -24(s0)
+	lui	a1, 802094
+	addiw	a1, a1, 496
+	sw	a1, 16(a2)
+	ld	a1, -24(s0)
+	sw	a0, 96(a1)
+	ld	a1, -24(s0)
+	sw	a0, 100(a1)
+	ld	ra, 24(sp)
+	ld	s0, 16(sp)
+	addi	sp, sp, 32
+	sd	ra, 12(zero)
+	sd	zero, 20(zero)
+	ret
+.Lfunc_end2:
+	.size	sha1_init, .Lfunc_end2-sha1_init
+
+	.globl	sha1_result
+	.p2align	1
+	.type	sha1_result,@function
+sha1_result:
+	addi	sp, sp, -32
+	sd	ra, 24(sp)
+	sd	s0, 16(sp)
+	addi	s0, sp, 32
+	sd	a0, -32(s0)
+	ld	a0, -32(s0)
+	lw	a0, 100(a0)
+	beqz	a0, .LBB3_2
+	j	.LBB3_1
+.LBB3_1:
+	li	a0, 0
+	sw	a0, -20(s0)
+	j	.LBB3_5
+.LBB3_2:
+	ld	a0, -32(s0)
+	lw	a0, 96(a0)
+	bnez	a0, .LBB3_4
+	j	.LBB3_3
+.LBB3_3:
+	ld	a0, -32(s0)
+	sd	ra, 12(zero)
+	li	t2, 1
+	sd	t2, 20(zero)
+	call	sha1_imbottitura
+	ld	a1, -32(s0)
+	li	a0, 1
+	sw	a0, 96(a1)
+	j	.LBB3_4
+.LBB3_4:
+	li	a0, 1
+	sw	a0, -20(s0)
+	j	.LBB3_5
+.LBB3_5:
+	lw	a0, -20(s0)
+	ld	ra, 24(sp)
+	ld	s0, 16(sp)
+	addi	sp, sp, 32
+	sd	ra, 12(zero)
+	sd	zero, 20(zero)
+	ret
+.Lfunc_end3:
+	.size	sha1_result, .Lfunc_end3-sha1_result
+
+	.globl	sha1_input
+	.p2align	1
+	.type	sha1_input,@function
+sha1_input:
+	addi	sp, sp, -48
+	sd	ra, 40(sp)
+	sd	s0, 32(sp)
+	addi	s0, sp, 48
+	sd	a0, -24(s0)
+	sd	a1, -32(s0)
+	sw	a2, -36(s0)
+	lw	a0, -36(s0)
+	bnez	a0, .LBB4_2
+	j	.LBB4_1
+.LBB4_1:
+	j	.LBB4_16
+.LBB4_2:
+	ld	a0, -24(s0)
+	lw	a0, 96(a0)
+	bnez	a0, .LBB4_4
+	j	.LBB4_3
+.LBB4_3:
+	ld	a0, -24(s0)
+	lw	a0, 100(a0)
+	beqz	a0, .LBB4_5
+	j	.LBB4_4
+.LBB4_4:
+	ld	a1, -24(s0)
+	li	a0, 1
+	sw	a0, 100(a1)
+	j	.LBB4_16
+.LBB4_5:
+	j	.LBB4_6
+.LBB4_6:
+	lw	a0, -36(s0)
+	addiw	a1, a0, -1
+	sw	a1, -36(s0)
+	li	a1, 0
+	sd	a1, -48(s0)
+	beqz	a0, .LBB4_8
+	j	.LBB4_7
+.LBB4_7:
+	ld	a0, -24(s0)
+	lw	a0, 100(a0)
+	seqz	a0, a0
+	sd	a0, -48(s0)
+	j	.LBB4_8
+.LBB4_8:
+	ld	a0, -48(s0)
+	andi	a0, a0, 1
+	beqz	a0, .LBB4_16
+	j	.LBB4_9
+.LBB4_9:
+	ld	a0, -32(s0)
+	lb	a0, 0(a0)
+	ld	a3, -24(s0)
+	lw	a2, 92(a3)
+	add	a1, a3, a2
+	addiw	a2, a2, 1
+	sw	a2, 92(a3)
+	sb	a0, 28(a1)
+	ld	a1, -24(s0)
+	lw	a0, 20(a1)
+	addiw	a0, a0, 8
+	sw	a0, 20(a1)
+	ld	a0, -24(s0)
+	lw	a0, 20(a0)
+	bnez	a0, .LBB4_13
+	j	.LBB4_10
+.LBB4_10:
+	ld	a1, -24(s0)
+	lw	a0, 24(a1)
+	addiw	a0, a0, 1
+	sw	a0, 24(a1)
+	ld	a0, -24(s0)
+	lw	a0, 24(a0)
+	bnez	a0, .LBB4_12
+	j	.LBB4_11
+.LBB4_11:
+	ld	a1, -24(s0)
+	li	a0, 1
+	sw	a0, 100(a1)
+	j	.LBB4_12
+.LBB4_12:
+	j	.LBB4_13
+.LBB4_13:
+	ld	a0, -24(s0)
+	lw	a0, 92(a0)
+	li	a1, 64
+	bne	a0, a1, .LBB4_15
+	j	.LBB4_14
+.LBB4_14:
+	ld	a0, -24(s0)
+	sd	ra, 12(zero)
+	li	t2, 1
+	sd	t2, 20(zero)
+	call	message_block_process
+	j	.LBB4_15
+.LBB4_15:
+	ld	a0, -32(s0)
+	addi	a0, a0, 1
+	sd	a0, -32(s0)
+	j	.LBB4_6
+.LBB4_16:
+	ld	ra, 40(sp)
+	ld	s0, 32(sp)
+	addi	sp, sp, 48
+	sd	ra, 12(zero)
+	sd	zero, 20(zero)
+	ret
+.Lfunc_end4:
+	.size	sha1_input, .Lfunc_end4-sha1_input
+
+	.globl	main
+	.p2align	1
+	.type	main,@function
+main:
+	addi	sp, sp, -160
+	sd	ra, 152(sp)
+	sd	s0, 144(sp)
+	addi	s0, sp, 160
+	li	a0, 0
+	sd	a0, -152(s0)
+	sw	a0, -20(s0)
+	addi	a0, s0, -128
+	sd	a0, -160(s0)
+	sd	ra, 12(zero)
+	li	t2, 1
+	sd	t2, 20(zero)
+	call	sha1_init
+	ld	a0, -160(s0)
+	lui	a1, %hi(.L.str)
+	addi	a1, a1, %lo(.L.str)
+	sd	a1, -136(s0)
+	li	a1, 16
+	sw	a1, -140(s0)
+	ld	a1, -136(s0)
+	lw	a2, -140(s0)
+	sd	ra, 12(zero)
+	li	t2, 1
+	sd	t2, 20(zero)
+	call	sha1_input
+	ld	a0, -152(s0)
+	ld	ra, 152(sp)
+	ld	s0, 144(sp)
+	addi	sp, sp, 160
+	sd	ra, 12(zero)
+	sd	zero, 20(zero)
+	ret
+.Lfunc_end5:
+	.size	main, .Lfunc_end5-main
+
+	.type	.L__const.message_block_process.K,@object
+	.section	.rodata.cst16,"aM",@progbits,16
+	.p2align	2, 0x0
+.L__const.message_block_process.K:
+	.word	1518500249
+	.word	1859775393
+	.word	2400959708
+	.word	3395469782
+	.size	.L__const.message_block_process.K, 16
+
+	.type	.L.str,@object
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.L.str:
+	.asciz	"cps exam project"
+	.size	.L.str, 17
+
+	.ident	"clang version 16.0.0 (https://github.com/letiziaburioli/llvm-project.git 1e627039b3666fbd7a6d5688a8f71092e48cf653)"
+	.section	".note.GNU-stack","",@progbits
+	.addrsig
+	.addrsig_sym message_block_process
+	.addrsig_sym sha1_imbottitura
+	.addrsig_sym sha1_init
+	.addrsig_sym sha1_input
