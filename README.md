@@ -15,17 +15,22 @@ Taken from [here](https://llvm.org/docs/GettingStarted.html).
 
 ### Overview
 
-Welcome to the Andi and Letizia's LLVM project!
+Welcome to Andi and Letizia's LLVM project!
+The purpose of our project is to reproduce a CFI protection mechanism. We considered a situation in which during a program execution a function call is reached, the control is transferred to its routine and its instructions are executed. After the execution of the function code, the return instruction is supposed to let the execution flow go back to the address immediately after the function call. Our purpose is to ensure that the return address is the originally intended one, avoiding instruction flow modification from malicious attackers which could modify it thus provoking the execution of some potentially dangerous code. 
 
-### Commands
-cd llvm  
+
+### Commands to build LLVM
+git clone https://github.com/llvm/llvm-project.git
+cd llvm-project/llvm 
 cmake -B build -G Ninja -DLLVM_ENABLE_PROJECTS="clang" -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=RISCV  
 cmake --build build  
-cd ..  
-llvm/build/bin/clang -target riscv64-unknown-elf -O0 -S -o - testFunction.c  
 
-#clang -target riscv64-unknown-elf -O0 --debug -S -emit-llvm testFunction.c
-#llvm/build/bin/llc testFunction.bc -o - -mailbox-offset 10
+### Run clang on an example file testFunction.c for a 64-bit RISCV architecture and observe the emitted IR in testFunction.bc
+cd ..  
+llvm/build/bin/clang -target riscv64-unknown-elf -O0 -S -emit-llvm testFunction.c -o testFunction.bc
+
+### Run llc with our pass on testFunction.bc and specify the pass CLI options
+llvm/build/bin/llc testFunction.bc -o - -mailbox-offset 10 -main-ret 1
 
 
 The LLVM project has multiple components. The core of the project is
