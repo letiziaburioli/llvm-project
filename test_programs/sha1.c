@@ -273,3 +273,29 @@ void sha1_input( sha1_struct *sha1,const unsigned char *message_array,unsigned l
     }
 }
 
+
+
+int main(){
+sha1_struct sha1;
+sha1_init(&sha1);
+
+
+const char *message = "cps exam project";
+
+int message_length = 16;// strlen(message);
+
+sha1_input(&sha1, (const unsigned char *)message, message_length);
+
+/*if (sha1_result(&sha1)) {
+	printf("SHA-1 Hash: ");
+	for (int i = 0; i<5; i++){
+		printf("%08x ", sha1.block_digest[i]);
+	}
+	printf("\n");
+} else{
+	printf("ERROR");
+
+}*/
+
+return 0;
+}

@@ -1,4 +1,4 @@
-//testFunction: call 2 functions --> Checked = 1
+//testFunction: call 3 functions --> Checked = 1
 
 int TestFunction1(){
 	int a = 5;

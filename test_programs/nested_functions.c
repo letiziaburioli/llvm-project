@@ -1,4 +1,4 @@
-//testFunction: call 2 functions --> Checked = 1
+//nested_functions: call 3 nested functions --> Checked = 1
 
 int TestFunction3(int a, int b){ //elevate a^b and subtract 37
 
@@ -27,15 +27,17 @@ int TestFunction1(int a, int b){ //sum the product of the inputs to the second i
 
 
 int main(){
-	int a=0;
-	int b=0;
+	int a = 0;
+	int b = 0;
 	
 	for(int i=0; i<4; i++){
 	a++;
 	b++;
+	}
 	
 	int Res = TestFunction1(a, b);
-	}
-		
+	
+	Res = Res * 2;
+			
 	return 0;
 }
